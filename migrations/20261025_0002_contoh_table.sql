@@ -1,0 +1,14 @@
+-- Tabel untuk modul contoh CRUD (modules/contoh). Hapus migration + modul ini bila tidak dipakai.
+
+IF OBJECT_ID(N'dbo.CONTOH', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[CONTOH] (
+    [keyCONTOH] BIGINT IDENTITY(1,1) NOT NULL,
+    [kdCONTOH] NVARCHAR(20) NOT NULL,
+    [nmCONTOH] NVARCHAR(100) NOT NULL,
+    [ketCONTOH] NVARCHAR(255) NULL,
+    CONSTRAINT [PK_CONTOH] PRIMARY KEY CLUSTERED ([keyCONTOH] ASC),
+    CONSTRAINT [UQ_CONTOH_kdCONTOH] UNIQUE NONCLUSTERED ([kdCONTOH] ASC)
+    );
+END
+GO

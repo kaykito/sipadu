@@ -1,0 +1,125 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+    <form id="form-user" autocomplete="off">
+    <input type="hidden" id="mode" name="mode" value="<%= mode %>">
+    <% if (mode === 'edit') { %>
+      <input type="hidden" id="userID_old" name="userID_old" value="<%= user.userID %>">
+    <% } %>
+    <div class="card">
+        <div class="card-header">
+        <h5 class="mb-0"><%= title %></h5>
+        <small class="text-muted"><%= subtitle %></small>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="userID" class="form-label">Username <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="userID" name="userID" value="<%= user ? user.userID : '' %>" required maxlength="50" placeholder="Username">
+            </div>
+            <div class="mb-3">
+                <label for="PWD" class="form-label">Password <% if (mode !== 'edit') { %><span class="text-danger">*</span><% } %></label>
+                <input type="password" class="form-control" id="PWD" name="PWD" <% if (mode !== 'edit') { %>required<% } %> minlength="6" maxlength="256" placeholder="Kosongkan jika tidak ingin mengubah password">
+            </div>
+            <div class="mb-3">
+                <label for="PWD2" class="form-label">Ulangi Password <% if (mode !== 'edit') { %><span class="text-danger">*</span><% } %></label>
+                <input type="password" class="form-control" id="PWD2" name="PWD2" <% if (mode !== 'edit') { %>required<% } %> minlength="6" maxlength="256" placeholder="Ulangi Password">
+            </div>
+            <div class="mb-3">
+                <label for="nmUSER" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="nmUSER" name="nmUSER" value="<%= user ? user.nmUSER : '' %>" required maxlength="100" placeholder="Nama Lengkap">
+            </div>
+            <div class="mb-3">
+                <label for="keyKLP" class="form-label">Kelompok <span class="text-danger">*</span></label>
+                <select class="form-control" id="keyKLP" class="selectpicker w-100" name="keyKLP" required>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="ketUSER" class="form-label">Keterangan</label>
+                <input type="text" class="form-control" id="ketUSER" name="ketUSER" value="<%= user ? user.ketUSER : '' %>" maxlength="200" placeholder="Keterangan">
+            </div>
+        </div>
+        <div class="card-footer text-end">
+            <button type="submit" class="btn btn-primary"><%= mode === 'edit' ? 'Update' : 'Simpan' %></button>
+            <button type="reset" class="btn btn-secondary">Reset</button>
+            <a href="../../user/index" class="btn btn-outline-dark">Kembali</a>
+        </div>
+    </div>
+    </form>
+</div>
+
+
+<script>
+$(document).ready(function() {
+  const keyklp = $('#keyKLP');
+  const mode = $('#mode').val();
+
+  // Inisialisasi Select2 untuk Kelompok
+  keyklp.select2({
+    dropdownParent: keyklp.parent(), 
+    ajax: {
+      url: '/kelompok/comboData',
+      dataType: 'json',
+      data: function (params) {
+        return { search: params.term || '' };
+      },
+      delay: 250,
+      processResults: function(data) { return data; }
+    },
+    placeholder: 'Pilih Kelompok',
+    allowClear: true
+  });
+
+  // --- BAGIAN PENTING: Logika untuk Mode Edit ---
+  if (mode === 'edit') {
+    // 1. Mengisi nilai awal untuk KELOMPOK
+    const initialKeyKLP = `<%= (typeof user !== 'undefined' && user && user.keyKLP) ? user.keyKLP : '' %>`;
+    const initialNmKLP = `<%= (typeof user !== 'undefined' && user && user.nmKLP) ? user.nmKLP.replace(/'/g, "\\'") : 'Memuat...' %>`;
+
+    if (initialKeyKLP && initialNmKLP) {
+      var optionKLP = new Option(initialNmKLP, initialKeyKLP, true, true);
+      keyklp.append(optionKLP).trigger('change');
+    }
+  }
+});
+
+
+// Script untuk submit form (tidak ada perubahan, sudah benar)
+document.getElementById('form-user').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const PWD = document.getElementById('PWD').value;
+  const PWD2 = document.getElementById('PWD2').value;
+
+  if (PWD !== PWD2) {
+      alert('Password dan Ulangi Password tidak cocok!');
+      return;
+  }
+  
+  var mode = document.getElementById('mode').value;
+  var endpoint = (mode === 'edit') ? '/user/update' : '/user/insert';
+  
+  var form = document.getElementById('form-user');
+  var formData = new FormData(form);
+  var params = new URLSearchParams();
+  for (var pair of formData.entries()) {
+    params.append(pair[0], pair[1]);
+  }
+
+  fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert('Data berhasil disimpan!');
+      window.location.href = '/user/index';
+    } else {
+      alert(data.message || 'Terjadi kesalahan saat menyimpan data.');
+    }
+  })
+  .catch(error => {
+      console.error('Fetch Error:', error);
+      alert('Tidak dapat terhubung ke server.');
+  });
+});
+</script>

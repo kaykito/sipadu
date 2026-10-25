@@ -1,0 +1,167 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><%= subtitle %></h5>
+      <% if (akses.add) { %>
+      <button type="button" class="btn btn-primary" id="btnAddContoh">
+        <i class="bx bx-plus me-1"></i> Tambah
+      </button>
+      <% } %>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive text-nowrap">
+        <table class="table table-sm table-bordered w-100" id="contohTable">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Kode</th>
+              <th>Nama</th>
+              <th>Keterangan</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Form -->
+<div class="modal fade" id="contohModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="contohModalTitle">Tambah Data</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <form id="formContoh" onsubmit="return false">
+        <div class="modal-body">
+          <input type="hidden" id="keyCONTOH" name="keyCONTOH">
+          <div class="mb-3">
+            <label for="kdCONTOH" class="form-label">Kode <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="kdCONTOH" name="kdCONTOH" maxlength="20" required>
+          </div>
+          <div class="mb-3">
+            <label for="nmCONTOH" class="form-label">Nama <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="nmCONTOH" name="nmCONTOH" maxlength="100" required>
+          </div>
+          <div class="mb-3">
+            <label for="ketCONTOH" class="form-label">Keterangan</label>
+            <input type="text" class="form-control" id="ketCONTOH" name="ketCONTOH" maxlength="255">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var canEdit = <%= akses.edit ? 'true' : 'false' %>;
+    var canDelete = <%= akses.delete ? 'true' : 'false' %>;
+
+    function escapeHtml(value) {
+      return $('<div>').text(value == null ? '' : value).html();
+    }
+
+    if ($.fn.DataTable.isDataTable('#contohTable')) {
+      $('#contohTable').DataTable().destroy();
+    }
+
+    var table = $('#contohTable').DataTable({
+      serverSide: true,
+      processing: true,
+      ajax: { url: '/contoh/data' },
+      columns: [
+        { data: null, orderable: false, render: function (data, type, row, meta) { return meta.settings._iDisplayStart + meta.row + 1; } },
+        { data: 'kdCONTOH', render: escapeHtml },
+        { data: 'nmCONTOH', render: escapeHtml },
+        { data: 'ketCONTOH', defaultContent: '-', render: escapeHtml },
+        {
+          data: null, orderable: false, className: 'text-center', width: '1%',
+          render: function (data, type, row) {
+            var buttons = '';
+            if (canEdit) buttons += '<button class="btn btn-sm btn-warning btn-edit me-1" data-id="' + row.keyCONTOH + '" title="Edit"><i class="bx bx-edit-alt"></i></button>';
+            if (canDelete) buttons += '<button class="btn btn-sm btn-danger btn-delete" data-id="' + row.keyCONTOH + '" title="Hapus"><i class="bx bx-trash"></i></button>';
+            return buttons || '-';
+          }
+        }
+      ],
+      order: [[1, 'asc']],
+      language: {
+        processing: 'Sedang memproses...',
+        lengthMenu: 'Tampilkan _MENU_ entri',
+        zeroRecords: 'Tidak ditemukan data yang sesuai',
+        info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ entri',
+        infoEmpty: 'Menampilkan 0 sampai 0 dari 0 entri',
+        infoFiltered: '(disaring dari _MAX_ entri keseluruhan)',
+        search: 'Cari:',
+        paginate: { first: 'Pertama', previous: 'Sebelumnya', next: 'Selanjutnya', last: 'Terakhir' }
+      }
+    });
+
+    function openModal(title, data) {
+      $('#contohModalTitle').text(title);
+      $('#formContoh')[0].reset();
+      $('#keyCONTOH').val(data ? data.keyCONTOH : '');
+      if (data) {
+        $('#kdCONTOH').val(data.kdCONTOH);
+        $('#nmCONTOH').val(data.nmCONTOH);
+        $('#ketCONTOH').val(data.ketCONTOH || '');
+      }
+      $('#contohModal').modal('show');
+    }
+
+    $('#btnAddContoh').off('click').on('click', function () {
+      openModal('Tambah Data', null);
+    });
+
+    $('#contohTable').off('click', '.btn-edit').on('click', '.btn-edit', function () {
+      $.get('/contoh/detail/' + $(this).data('id'), function (res) {
+        if (res.success) openModal('Edit Data', res.data);
+        else Swal.fire('Gagal', res.message, 'error');
+      });
+    });
+
+    $('#contohTable').off('click', '.btn-delete').on('click', '.btn-delete', function () {
+      var id = $(this).data('id');
+      Swal.fire({
+        title: 'Hapus data?',
+        text: 'Data yang dihapus tidak dapat dikembalikan.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Hapus',
+        cancelButtonText: 'Batal'
+      }).then(function (result) {
+        if (!result.isConfirmed) return;
+        $.ajax({ url: '/contoh/delete/' + id, type: 'DELETE' })
+          .done(function (res) {
+            Swal.fire(res.success ? 'Berhasil' : 'Gagal', res.message, res.success ? 'success' : 'error');
+            if (res.success) table.ajax.reload(null, false);
+          })
+          .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); });
+      });
+    });
+
+    $('#formContoh').off('submit').on('submit', function () {
+      var url = $('#keyCONTOH').val() ? '/contoh/update' : '/contoh/insert';
+      $.post(url, $(this).serialize())
+        .done(function (res) {
+          if (res.success) {
+            $('#contohModal').modal('hide');
+            table.ajax.reload(null, false);
+            Swal.fire('Berhasil', res.message, 'success');
+          } else {
+            Swal.fire('Gagal', res.message, 'error');
+          }
+        })
+        .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); });
+    });
+  })();
+</script>

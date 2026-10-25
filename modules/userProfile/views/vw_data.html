@@ -1,0 +1,234 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+  <div class="row">
+    <div class="col-md-12">
+      <ul class="nav nav-pills flex-column flex-md-row mb-3" role="tablist">
+        <li class="nav-item">
+          <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#accountContent"><i class="bx bx-user me-1"></i> Akun</button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#securityContent"><i class="bx bx-lock-alt me-1"></i> Keamanan</button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#devicesContent"><i class="bx bx-devices me-1"></i> Perangkat</button>
+        </li>
+      </ul>
+
+      <div class="tab-content p-0 bg-transparent shadow-none">
+        <!-- Akun -->
+        <div class="tab-pane fade show active" id="accountContent" role="tabpanel">
+          <div class="card mb-4">
+            <h5 class="card-header">Detail Profil</h5>
+            <div class="card-body">
+              <div class="d-flex align-items-start align-items-sm-center gap-4">
+                <img
+                  src="<%= user.avatar ? '/uploads/avatars/' + user.avatar : '/assets/img/avatars/1.jpg' %>"
+                  data-default-src="/assets/img/avatars/1.jpg"
+                  alt="user-avatar"
+                  class="d-block rounded"
+                  height="100"
+                  width="100"
+                  id="uploadedAvatar" />
+                <div class="button-wrapper">
+                  <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
+                    <span class="d-none d-sm-block">Unggah foto baru</span>
+                    <i class="bx bx-upload d-block d-sm-none"></i>
+                    <input type="file" id="upload" class="account-file-input" hidden accept="image/png, image/jpeg, image/gif" />
+                  </label>
+                  <button type="button" class="btn btn-label-secondary account-image-reset mb-4">
+                    <i class="bx bx-reset d-block d-sm-none"></i>
+                    <span class="d-none d-sm-block">Reset</span>
+                  </button>
+                  <p class="mb-0">Format yang didukung JPG, GIF atau PNG. Ukuran maksimal 800K</p>
+                </div>
+              </div>
+            </div>
+            <hr class="my-0" />
+            <div class="card-body">
+              <form id="formAccountSettings" onsubmit="return false">
+                <div class="row">
+                  <div class="mb-3 col-md-6">
+                    <label for="userID" class="form-label">User ID</label>
+                    <input class="form-control" type="text" id="userID" value="<%= user.userID %>" readonly />
+                  </div>
+                  <div class="mb-3 col-md-6">
+                    <label for="nmKLP" class="form-label">Kelompok</label>
+                    <input class="form-control" type="text" id="nmKLP" value="<%= user.nmKLP || '-' %>" readonly />
+                  </div>
+                  <div class="mb-3 col-md-6">
+                    <label for="nmUSER" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
+                    <input class="form-control" type="text" id="nmUSER" name="nmUSER" value="<%= user.nmUSER || '' %>" maxlength="100" required />
+                  </div>
+                  <div class="mb-3 col-md-6">
+                    <label for="ketUSER" class="form-label">Keterangan</label>
+                    <input class="form-control" type="text" id="ketUSER" name="ketUSER" value="<%= user.ketUSER || '' %>" maxlength="255" />
+                  </div>
+                </div>
+                <div class="mt-2">
+                  <button type="submit" class="btn btn-primary me-2">Simpan Perubahan</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Keamanan -->
+        <div class="tab-pane fade" id="securityContent" role="tabpanel">
+          <div class="card mb-4">
+            <h5 class="card-header">Ganti Password</h5>
+            <div class="card-body">
+              <form id="formChangePassword" onsubmit="return false">
+                <div class="row">
+                  <div class="mb-3 col-md-6">
+                    <label class="form-label" for="currentPassword">Password Saat Ini</label>
+                    <input class="form-control" type="password" name="currentPassword" id="currentPassword" autocomplete="current-password" required />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="mb-3 col-md-6">
+                    <label class="form-label" for="newPassword">Password Baru</label>
+                    <input class="form-control" type="password" id="newPassword" name="newPassword" minlength="6" autocomplete="new-password" required />
+                  </div>
+                  <div class="mb-3 col-md-6">
+                    <label class="form-label" for="confirmPassword">Ulangi Password Baru</label>
+                    <input class="form-control" type="password" name="confirmPassword" id="confirmPassword" minlength="6" autocomplete="new-password" required />
+                  </div>
+                </div>
+                <p class="text-muted small">Minimal 6 karakter.</p>
+                <button type="submit" class="btn btn-primary me-2">Simpan Password</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Perangkat -->
+        <div class="tab-pane fade" id="devicesContent" role="tabpanel">
+          <div class="card mb-4">
+            <h5 class="card-header">Perangkat Login</h5>
+            <div class="table-responsive">
+              <table class="table border-top">
+                <thead>
+                  <tr>
+                    <th>Perangkat</th>
+                    <th>Browser</th>
+                    <th>IP</th>
+                    <th>Akses Terakhir</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (!devices || devices.length === 0) { %>
+                  <tr><td colspan="6" class="text-center text-muted">Belum ada data perangkat</td></tr>
+                  <% } %>
+                  <% (devices || []).forEach(function (device) {
+                       const isThisDevice = device.sessionID && device.sessionID === currentSessionId;
+                       const icon = device.deviceType === 'mobile' ? 'bx-mobile' : (device.deviceType === 'tablet' ? 'bx-tab' : 'bx-laptop'); %>
+                  <tr>
+                    <td><i class="bx <%= icon %> me-2"></i><%= device.deviceName %> <small class="text-muted">(<%= device.deviceOS %>)</small></td>
+                    <td><%= device.browser %></td>
+                    <td><%= device.ipAddress || '-' %></td>
+                    <td><%= device.lastAccess ? new Date(device.lastAccess).toLocaleString('id-ID') : '-' %></td>
+                    <td>
+                      <% if (isThisDevice) { %>
+                      <span class="badge bg-label-primary">Perangkat ini</span>
+                      <% } else if (device.isActive) { %>
+                      <span class="badge bg-label-success">Aktif</span>
+                      <% } else { %>
+                      <span class="badge bg-label-secondary">Keluar</span>
+                      <% } %>
+                    </td>
+                    <td class="text-end">
+                      <% if (device.isActive && !isThisDevice) { %>
+                      <button type="button" class="btn btn-sm btn-outline-danger btn-logout-device" data-key="<%= device.keyDEVICE %>">Keluarkan</button>
+                      <% } %>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    function notify(res) {
+      Swal.fire(res.success ? 'Berhasil' : 'Gagal', res.message || '', res.success ? 'success' : 'error');
+    }
+    function fail() {
+      Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+    }
+
+    // Simpan profil
+    $('#formAccountSettings').off('submit').on('submit', function () {
+      $.post('/userProfile/update', {
+        nmUSER: $('#nmUSER').val(),
+        ketUSER: $('#ketUSER').val()
+      }, notify).fail(fail);
+    });
+
+    // Ganti password
+    $('#formChangePassword').off('submit').on('submit', function () {
+      if ($('#newPassword').val() !== $('#confirmPassword').val()) {
+        Swal.fire('Gagal', 'Konfirmasi password baru tidak cocok.', 'error');
+        return;
+      }
+      $.post('/userProfile/changePassword', $(this).serialize(), function (res) {
+        notify(res);
+        if (res.success) $('#formChangePassword')[0].reset();
+      }).fail(fail);
+    });
+
+    // Upload avatar
+    $('#upload').off('change').on('change', function () {
+      if (!this.files || !this.files[0]) return;
+      var formData = new FormData();
+      formData.append('avatar', this.files[0]);
+      $.ajax({
+        url: '/userProfile/uploadAvatar',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+          notify(res);
+          if (res.success) $('#uploadedAvatar').attr('src', res.url);
+        },
+        error: fail
+      });
+      this.value = '';
+    });
+
+    // Reset avatar
+    $('.account-image-reset').off('click').on('click', function () {
+      $.post('/userProfile/resetAvatar', function (res) {
+        notify(res);
+        if (res.success) $('#uploadedAvatar').attr('src', $('#uploadedAvatar').data('default-src'));
+      }).fail(fail);
+    });
+
+    // Keluarkan perangkat lain
+    $(document).off('click.profileDevice').on('click.profileDevice', '.btn-logout-device', function () {
+      var $btn = $(this);
+      Swal.fire({
+        title: 'Keluarkan perangkat?',
+        text: 'Sesi login di perangkat tersebut akan diakhiri.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Keluarkan',
+        cancelButtonText: 'Batal'
+      }).then(function (result) {
+        if (!result.isConfirmed) return;
+        $.post('/userProfile/logoutDevice', { keyDEVICE: $btn.data('key') }, function (res) {
+          notify(res);
+          if (res.success) $btn.closest('tr').find('.badge').attr('class', 'badge bg-label-secondary').text('Keluar');
+          if (res.success) $btn.remove();
+        }).fail(fail);
+      });
+    });
+  })();
+</script>

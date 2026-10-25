@@ -1,0 +1,212 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+    <% if (typeof error_msg !== 'undefined' && error_msg) { %>
+  <div class="alert alert-danger alert-dismissible" role="alert">
+    <%= error_msg %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  <% } %>
+
+  <!-- Card daftar kelompok -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><%= subtitle %></h5>
+      <div>
+        <button type="button" class="btn btn-primary" id="btnAddKelompok">
+          <i class="bx bx-plus me-1"></i> Tambah Kelompok
+        </button>
+      </div>
+    </div>
+    
+    <div class="card-body">
+      <!-- Filter dan pencarian -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text"><i class="bx bx-search"></i></span>
+            <input type="text" id="searchInput" class="form-control" placeholder="Cari kelompok..." />
+          </div>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <a href="/kelompok/exportPDF" class="btn btn-danger btn-sm">Export PDF</a>
+          <a href="/kelompok/exportExcel" class="btn btn-success btn-sm">Export Excel</a>
+        </div>
+      </div>
+      
+      <!-- Tabel data kelompok -->
+      <div class="table-responsive text-nowrap">
+        <table class="datatables-basic table table-sm table-bordered" id="kelompokTable">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Kelompok</th>
+              <th>Keterangan</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data kelompok akan diisi oleh DataTables -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Konfirmasi Hapus</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Apakah Anda yakin ingin menghapus kelompok ini?</p>
+        <p class="text-danger">Perhatian: Menghapus kelompok dapat memengaruhi user yang menggunakan kelompok ini.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Hapus</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Tambah/Edit Kelompok -->
+<div class="modal fade" id="kelompokModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog">
+    <form id="formKelompok" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="kelompokModalTitle">Tambah Kelompok</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="keyKLP" name="keyKLP">
+        <div class="mb-3">
+          <label for="nmKLP" class="form-label">Nama Kelompok</label>
+          <input type="text" id="nmKLP" name="nmKLP" class="form-control" required maxlength="100">
+        </div>
+        <div class="mb-3">
+          <label for="ketKLP" class="form-label">Keterangan</label>
+          <input type="text" id="ketKLP" name="ketKLP" class="form-control" maxlength="255">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Simpan</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Fungsi untuk mengonfirmasi hapus
+  function confirmDelete(id) {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    
+    confirmBtn.onclick = function() {
+      // Kirim request hapus via AJAX
+      fetch('/kelompok/delete/' + id)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            // Reload DataTable
+            $('#kelompokTable').DataTable().ajax.reload();
+            // Tutup modal
+            modal.hide();
+            // Tampilkan notifikasi sukses
+            Swal.fire('Berhasil', data.message, 'success');
+          } else {
+            Swal.fire('Gagal', data.message, 'error');
+          }
+        });
+    };
+    
+    modal.show();
+  }
+  
+  // Buka modal tambah kelompok
+  function openAddKelompok() {
+    $('#kelompokModalTitle').text('Tambah Kelompok');
+    $('#formKelompok')[0].reset();
+    $('#keyKLP').val('');
+    $('#kelompokModal').modal('show');
+  }
+  // Buka modal edit kelompok
+  function openEditKelompok(id) {
+    $.get('/kelompok/detail/' + id, function(data) {
+      if(data.success) {
+        $('#kelompokModalTitle').text('Edit Kelompok');
+        $('#keyKLP').val(data.data.keyKLP);
+        $('#nmKLP').val(data.data.nmKLP);
+        $('#ketKLP').val(data.data.ketKLP);
+        $('#kelompokModal').modal('show');
+      } else {
+        Swal.fire('Gagal', data.message, 'error');
+      }
+    });
+  }
+  // Submit form tambah/edit kelompok
+  $('#formKelompok').on('submit', function(e) {
+    e.preventDefault();
+    var id = $('#keyKLP').val();
+    var url = id ? '/kelompok/update/' + id : '/kelompok/insert';
+    $.ajax({
+      url: url,
+      method: 'POST',
+      data: $(this).serialize(),
+      success: function(res) {
+        if(res.success) {
+          $('#kelompokModal').modal('hide');
+          $('#kelompokTable').DataTable().ajax.reload();
+          Swal.fire('Berhasil', res.message, 'success');
+        } else {
+          Swal.fire('Gagal', res.message, 'error');
+        }
+      }
+    });
+  });
+  
+  $(document).ready(function() {
+    // Hancurkan DataTable jika sudah ada
+    if ($.fn.DataTable.isDataTable('#kelompokTable')) {
+      $('#kelompokTable').DataTable().destroy();
+    }
+
+    // Inisialisasi DataTable
+    var table = $('#kelompokTable').DataTable({
+      ajax: {
+        url: '/kelompok/data',
+        dataSrc: 'data'
+      },
+      columns: [
+        { data: null, render: (data, type, row, meta) => meta.row + 1 },
+        { data: 'nmKLP', defaultContent: '-' },
+        { data: 'ketKLP', defaultContent: '-' },
+        { data: null, render: function(data, type, row) {
+            return `
+              <button class="btn btn-warning btn-sm me-1" onclick="openEditKelompok(${row.keyKLP})" title="Edit">
+                <i class="bx bx-edit-alt"></i>
+              </button>
+              <button class="btn btn-danger btn-sm" onclick="confirmDelete(${row.keyKLP})" title="Hapus">
+                <i class="bx bx-trash"></i>
+              </button>
+            `;
+          }
+        }
+      ],
+      columnDefs: [{ targets: -1, width: '1%', className: 'text-center action-cell no-wrap', orderable: false }]
+    });
+
+    // Filter pencarian
+    $('#searchInput').on('keyup', function() {
+      table.search(this.value).draw();
+    });
+
+    // Ganti tombol tambah kelompok agar buka modal
+    $(document).on('click', '#btnAddKelompok', function() {
+      openAddKelompok();
+    });
+  });
+</script>

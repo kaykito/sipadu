@@ -1,0 +1,9 @@
+{
+  "ignore": [
+    "storage/**",
+    "uploads/**",
+    "backup/**",
+    "public/uploads/**",
+    "*.log"
+  ]
+}

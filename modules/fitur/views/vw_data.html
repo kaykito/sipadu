@@ -1,0 +1,277 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+    <% if (typeof error_msg !== 'undefined' && error_msg) { %>
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <%= error_msg %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <% } %>
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4><%= subtitle %></h4>
+                <div class="mb-3 d-flex justify-content-end">
+                    <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+                        <i class="bx bx-plus"></i>
+                        Tambah Fitur
+                    </button>
+                </div>
+            </div>
+            <table id="fiturTable" class="table table-bordered table-sm w-100">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Kode</th>
+                        <th>Nama Fitur</th>
+                        <th>Parent</th>
+                        <th>URL</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Fitur -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Tambah Fitur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="addKdFITUR" class="form-label">Kode Fitur</label>
+                        <input type="text" class="form-control" id="addKdFITUR" name="kdFITUR" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addNmFITUR" class="form-label">Nama Fitur</label>
+                        <input type="text" class="form-control" id="addNmFITUR" name="nmFITUR" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addParentKeyFITUR" class="form-label">Parent Fitur</label>
+                        <select class="form-control" id="addParentKeyFITUR" name="parentKeyFITUR">
+                            <option value="">-- Pilih Parent (Opsional) --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addUrl" class="form-label">URL</label>
+                        <input type="text" class="form-control" id="addUrl" name="url" placeholder="Contoh: /fitur/index">
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="submit" class="btn btn-success px-4"><b>Simpan</b></button>
+                    <button type="button" class="btn btn-danger px-4" data-bs-dismiss="modal"><b>Batal</b></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Fitur -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Fitur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editKeyFITUR" name="keyFITUR">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editKdFITUR" class="form-label">Kode Fitur</label>
+                        <input type="text" class="form-control" id="editKdFITUR" name="kdFITUR" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editNmFITUR" class="form-label">Nama Fitur</label>
+                        <input type="text" class="form-control" id="editNmFITUR" name="nmFITUR" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editParentKeyFITUR" class="form-label">Parent Fitur</label>
+                        <select class="form-control" id="editParentKeyFITUR" name="parentKeyFITUR">
+                            <option value="">-- Pilih Parent (Opsional) --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editUrl" class="form-label">URL</label>
+                        <input type="text" class="form-control" id="editUrl" name="url" placeholder="Contoh: /fitur/index">
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="submit" class="btn btn-success px-4"><b>Update</b></button>
+                    <button type="button" class="btn btn-danger px-4" data-bs-dismiss="modal"><b>Batal</b></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus data ini?</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-success px-4" id="confirmDeleteBtn"><b>Hapus</b></button>
+                <button type="button" class="btn btn-danger px-4" data-bs-dismiss="modal"><b>Batal</b></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(function () {
+        // DataTable FITUR
+        let dt = $('#fiturTable').DataTable({
+            paging: true,
+            searching: true,
+            info: true,
+            destroy: true,
+            ajax: {
+                url: '/fitur/data',
+                dataSrc: 'data'
+            },
+            columns: [
+                { data: null, render: (data, type, row, meta) => meta.row + 1 },
+                { data: 'kdFITUR' },
+                { data: 'nmFITUR' },
+                { data: 'parentNmFITUR', defaultContent: '-' },
+                { data: 'url', defaultContent: '-' },
+                { data: null, orderable: false, render: (data, type, row) => `<button class="btn btn-warning btn-sm btn-edit" data-keyfitur="${row.keyFITUR}"><i class="bx bx-edit"></i></button> <button class="btn btn-danger btn-sm btn-delete" data-keyfitur="${row.keyFITUR}"><i class="bx bx-trash"></i></button>` }
+            ],
+            columnDefs: [{ targets: -1, width: '1%', className: 'text-center action-cell no-wrap', orderable: false }],
+            order: [[1, 'asc']]
+        });
+
+        // Handler tombol edit
+        $(document).on('click', '.btn-edit', function () {
+            const keyFITUR = $(this).data('keyfitur');
+            $.get('/fitur/get/' + keyFITUR, function (res) {
+                if (res.success && res.data) {
+                    $('#editKeyFITUR').val(res.data.keyFITUR);
+                    $('#editKdFITUR').val(res.data.kdFITUR);
+                    $('#editNmFITUR').val(res.data.nmFITUR);
+                    $('#editUrl').val(res.data.url || '');
+                    loadParents('editParentKeyFITUR', res.data.parentKeyFITUR, res.data.keyFITUR);
+                    $('#editModal').modal('show');
+                } else {
+                    Swal.fire('Gagal', res.message || 'Data tidak ditemukan', 'error');
+                }
+            });
+        });
+
+        // Handler tombol hapus
+        $(document).on('click', '.btn-delete', function () {
+            const keyFITUR = $(this).data('keyfitur');
+            Swal.fire({
+                title: 'Konfirmasi',
+                text: 'Apakah Anda yakin ingin menghapus data ini?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/fitur/delete/' + keyFITUR,
+                        type: 'DELETE',
+                        success: function (res) {
+                            if (res.success) {
+                                Swal.fire('Sukses', res.message, 'success');
+                                $('#fiturTable').DataTable().ajax.reload();
+                            } else {
+                                Swal.fire('Gagal', res.message, 'error');
+                            }
+                        },
+                        error: function () {
+                            Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+                        }
+                    });
+                }
+            });
+        });
+
+        // Handler tombol tambah
+        window.openAddModal = function () {
+            $('#addForm')[0].reset();
+            loadParents('addParentKeyFITUR');
+            $('#addModal').modal('show');
+        };
+
+        // Load parent fitur untuk select
+        window.loadParents = function (selectId, selectedValue = null, excludeId = null) {
+            $.get('/fitur/parents', function (data) {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">-- Pilih Parent (Opsional) --</option>';
+                (data.data || data).forEach(parent => {
+                    if (excludeId && parent.keyFITUR == excludeId) return;
+                    const option = document.createElement('option');
+                    option.value = parent.keyFITUR;
+                    option.textContent = parent.nmFITUR;
+                    if (selectedValue && parent.keyFITUR == selectedValue) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+            });
+        };
+
+        // Submit tambah fitur
+        $('#addForm').on('submit', function (e) {
+            e.preventDefault();
+            const formData = {
+                kdFITUR: $('#addKdFITUR').val(),
+                nmFITUR: $('#addNmFITUR').val(),
+                parentKeyFITUR: $('#addParentKeyFITUR').val(),
+                url: $('#addUrl').val()
+            };
+            $.post('/fitur/insert', formData, function (res) {
+                if (res.success) {
+                    Swal.fire('Sukses', res.message, 'success');
+                    $('#addModal').modal('hide');
+                    $('#fiturTable').DataTable().ajax.reload();
+                } else {
+                    Swal.fire('Gagal', res.message, 'error');
+                }
+            }).fail(function () {
+                Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+            });
+        });
+
+        // Submit edit fitur
+        $('#editForm').on('submit', function (e) {
+            e.preventDefault();
+            const formData = {
+                keyFITUR: $('#editKeyFITUR').val(),
+                kdFITUR: $('#editKdFITUR').val(),
+                nmFITUR: $('#editNmFITUR').val(),
+                parentKeyFITUR: $('#editParentKeyFITUR').val(),
+                url: $('#editUrl').val()
+            };
+            $.post('/fitur/update', formData, function (res) {
+                if (res.success) {
+                    Swal.fire('Sukses', res.message, 'success');
+                    $('#editModal').modal('hide');
+                    $('#fiturTable').DataTable().ajax.reload();
+                } else {
+                    Swal.fire('Gagal', res.message, 'error');
+                }
+            }).fail(function () {
+                Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+            });
+        });
+    });
+</script>

@@ -1,0 +1,486 @@
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <h4 class="py-3 breadcrumb-wrapper mb-2">Hak Akses Kelompok</h4>
+
+      <p>
+        Peran memberikan akses ke menu dan fitur yang telah ditentukan sehingga administrator dapat memberikan akses sesuai kebutuhan pengguna berdasarkan peran yang ditetapkan.
+      </p>
+
+      <!-- Role cards -->
+      <div class="row g-4">
+        <% kelompok.forEach(k => { %>
+        <div class="col-xl-4 col-lg-6 col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between mb-2">
+                <h6 class="fw-normal">Total <%= k.userCount || 0 %> pengguna</h6>
+                <div class="avatar-group">
+                  <!-- Placeholder avatars - you can populate with actual user avatars -->
+                  <% for(let i = 0; i < Math.min(k.userCount || 0, 3); i++) { %>
+                  <!-- <div class="avatar avatar-sm">
+                    <img src="../../assets/img/avatars/<%= (i % 5) + 1 %>.png" alt="Avatar" class="rounded-circle" />
+                  </div> -->
+                  <% } %>
+                  <% if ((k.userCount || 0) > 3) { %>
+                  <div class="avatar avatar-sm">
+                    <span class="avatar-initial rounded-circle bg-label-primary">+<%= (k.userCount || 0) - 3 %></span>
+                  </div>
+                  <% } %>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-end">
+                <div class="role-heading">
+                  <h4 class="mb-1"><%= k.nmKLP %></h4>
+                  <a href="javascript:;" class="role-edit-modal" data-role-id="<%= k.keyKLP %>">
+                    <small>Edit Peran</small>
+                  </a>
+                </div>
+                <% if (String(k.nmKLP || '').toLowerCase() !== 'admin') { %>
+                  <button type="button"
+                          class="btn btn-sm btn-icon btn-label-danger role-delete"
+                          data-role-id="<%= k.keyKLP %>"
+                          data-role-name="<%= k.nmKLP %>"
+                          data-user-count="<%= k.userCount || 0 %>"
+                          title="Hapus Peran">
+                    <i class="bx bx-trash"></i>
+                  </button>
+                <% } else { %>
+                  <button type="button" class="btn btn-sm btn-icon btn-label-secondary" disabled title="Admin tidak bisa dihapus">
+                    <i class="bx bx-lock-alt"></i>
+                  </button>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% }) %>
+
+        <div class="col-xl-4 col-lg-6 col-md-6">
+          <div class="card h-100">
+            <div class="row h-100">
+              <div class="col-sm-5">
+                <div class="d-flex align-items-end h-100 justify-content-center mt-sm-0 mt-3">
+                  <img src="../../assets/img/illustrations/lady-with-laptop-light.png" class="img-fluid" alt="Image" width="100"
+                       data-app-light-img="illustrations/lady-with-laptop-light.png"
+                       data-app-dark-img="illustrations/lady-with-laptop-dark.png" />
+                </div>
+              </div>
+              <div class="col-sm-7">
+                <div class="card-body text-sm-end text-center ps-sm-0">
+                  <button data-bs-target="#addRoleModal" data-bs-toggle="modal" class="btn btn-primary mb-3 text-nowrap add-new-role">
+                    Tambah Peran Baru
+                  </button>
+                  <p class="mb-0">Tambah peran, jika belum ada</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--/ Role cards -->
+
+      <!-- Add Role Modal -->
+      <div class="modal fade" id="addRoleModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-add-new-role">
+          <div class="modal-content p-3 p-md-5">
+            <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-body">
+              <div class="text-center mb-4">
+                <h3 class="role-title" id="modalTitle">Tambah Peran Baru</h3>
+                <p>Atur izin peran</p>
+              </div>
+              <!-- Add role form -->
+              <form id="addRoleForm" class="row g-3" onsubmit="return false">
+                <input type="hidden" id="roleId" name="roleId">
+                <div class="col-12 mb-4">
+                  <label class="form-label" for="modalRoleName">Nama Peran</label>
+                  <input type="text" id="modalRoleName" name="modalRoleName" class="form-control" placeholder="Masukkan nama peran" tabindex="-1" />
+                </div>
+                <div class="col-12">
+                  <h5>Izin Peran</h5>
+                  <!-- Permission table -->
+                  <div class="table-responsive">
+                    <table class="table table-flush-spacing table-sm">
+                      <tbody>
+                                                <% const aksiList = ['view','add','edit','delete','validasi','export']; %>
+                        <% const aksiLabels = ['Lihat','Tambah','Ubah','Hapus','Validasi','Ekspor']; %>
+                        <% fitur.forEach(f => { %>
+                        <tr>
+                          <td class="text-nowrap fw-medium">
+                            <% if (f.kdFITUR) { %>
+                              <span class="text-muted small"><%= f.kdFITUR %> - </span>
+                            <% } %>
+                            <%= f.nmFITUR %>
+                          </td>
+                          <td>
+                            <div class="d-flex">
+                              <% aksiList.forEach(aksi => { %>
+                              <div class="form-check me-3 me-lg-5">
+                                <input class="form-check-input permission-checkbox" type="checkbox"
+                                       id="<%= f.keyFITUR %>_<%= aksi %>" name="permissions[<%= f.keyFITUR %>][<%= aksi %>]" />
+                                <label class="form-check-label" for="<%= f.keyFITUR %>_<%= aksi %>">
+                                  <%= aksi.charAt(0).toUpperCase() + aksi.slice(1) %>
+                                </label>
+                              </div>
+                              <% }) %>
+                            </div>
+                          </td>
+                        </tr>
+                        <% }) %>
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- Permission table -->
+                </div>
+                <div class="col-12 text-center">
+                  <button type="submit" class="btn btn-primary me-sm-3 me-1">Kirim</button>
+                  <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal" aria-label="Close">
+                    Batal
+                  </button>
+                </div>
+              </form>
+              <!--/ Add role form -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--/ Add Role Modal -->
+    </div>
+
+    <script>
+    (function() {
+    // Menggunakan IIFE untuk menghindari redeclaration
+    let currentRoleId = null;
+    let otorisasiData = <%- JSON.stringify(otorisasi) %>;
+    let kelompokData = <%- JSON.stringify(kelompok) %>;
+    let fiturData = <%- JSON.stringify(fitur) %>;
+
+    $(document).ready(function() {
+
+
+
+
+        $(document).off('.otorisasi');
+        $('#addRoleForm').off('.otorisasi');
+
+        // Initialize DataTable for users
+        initializeUsersTable();
+
+        // Handle role edit modal - use event delegation for dynamic content
+        $(document).on('click.otorisasi', '.role-edit-modal', function(e) {
+            e.preventDefault();
+            const roleId = $(this).data('role-id');
+
+            openRoleModal('edit', roleId);
+        });
+
+        // Handle add new role
+        $(document).on('click.otorisasi', '.add-new-role', function(e) {
+            e.preventDefault();
+
+            openRoleModal('add');
+        });
+
+        $(document).on('click.otorisasi', '.role-delete', function(e) {
+            e.preventDefault();
+            deleteRole($(this).data('role-id'), $(this).data('role-name'), Number($(this).data('user-count') || 0));
+        });
+
+        // Handle form submission
+        $('#addRoleForm').on('submit.otorisasi', function(e) {
+            e.preventDefault();
+
+            handleFormSubmission();
+        });
+
+        // Handle view permission cascading
+        $(document).on('change.otorisasi', '.permission-checkbox[id$="_view"]', function() {
+            const isChecked = $(this).is(':checked');
+            const baseId = $(this).attr('id').replace('_view', '');
+
+            // When view is checked/unchecked, check/uncheck all other permissions for this feature
+            const relatedCheckboxes = [
+                `#${baseId}_add`,
+                `#${baseId}_edit`,
+                `#${baseId}_delete`,
+                `#${baseId}_validasi`,
+                `#${baseId}_export`
+            ];
+
+            relatedCheckboxes.forEach(selector => {
+                $(selector).prop('checked', isChecked);
+            });
+
+        });
+
+        // Handle reverse cascading: when other permissions are checked, ensure view is also checked
+        $(document).on('change.otorisasi', '.permission-checkbox:not([id$="_view"])', function() {
+            const isChecked = $(this).is(':checked');
+            if (isChecked) {
+                const checkboxId = $(this).attr('id');
+                const baseId = checkboxId.replace(/_(add|edit|delete|validasi|export)$/, '');
+                const viewCheckbox = $(`#${baseId}_view`);
+
+                if (!viewCheckbox.is(':checked')) {
+                    viewCheckbox.prop('checked', true);
+
+                }
+            }
+        });
+    });
+
+    function initializeUsersTable() {
+        // Hancurkan DataTable jika sudah ada
+        if ($.fn.DataTable.isDataTable('#usersTable')) {
+            $('#usersTable').DataTable().destroy();
+        }
+
+        // This would typically load user data from an API
+        // For now, we'll create a placeholder structure
+        $('#usersTable').DataTable({
+            data: [], // Empty for now - you can populate with actual user data
+            columns: [
+                { data: null, render: (data, type, row, meta) => meta.row + 1 },
+                { data: 'userName', defaultContent: '-' },
+                { data: 'roleName', defaultContent: '-' },
+                { data: 'status', defaultContent: 'Active' },
+                {
+                    data: null,
+                    render: function(data, type, row) {
+                        return `
+                            <div class="d-flex align-items-center">
+                                <a href="javascript:;" class="text-body"><i class="bx bx-edit-alt mx-1"></i></a>
+                                <a href="javascript:;" class="text-body"><i class="bx bx-trash mx-1"></i></a>
+                            </div>
+                        `;
+                    }
+                }
+            ],
+            dom: 'rtip',
+            language: {
+                emptyTable: 'Tidak ada pengguna ditemukan'
+            }
+        });
+    }
+
+    function openRoleModal(mode, roleId = null) {
+        const modal = $('#addRoleModal');
+        const form = $('#addRoleForm');
+        const title = $('#modalTitle');
+
+        // Reset form
+        form[0].reset();
+        $('#roleId').val('');
+        currentRoleId = null;
+
+        // Clear all permission checkboxes
+        $('.permission-checkbox').prop('checked', false);
+
+        if (mode === 'add') {
+            title.text('Tambah Peran Baru');
+            $('#modalRoleName').val('');
+        } else if (mode === 'edit' && roleId) {
+            title.text('Edit Peran');
+            currentRoleId = roleId;
+
+            // Find role data - convert to same type for comparison
+            const role = kelompokData.find(k => parseInt(k.keyKLP) === parseInt(roleId));
+            if (role) {
+                $('#roleId').val(roleId);
+                $('#modalRoleName').val(role.nmKLP);
+
+                // Load existing permissions for this role
+                loadRolePermissions(roleId);
+            } else {
+
+            }
+        }
+
+        modal.modal('show');
+    }
+
+    function loadRolePermissions(roleId) {
+
+
+        // Clear all checkboxes first
+        $('.permission-checkbox').prop('checked', false);
+
+        // Load permissions for the selected role
+        let permissionsFound = 0;
+        const permissionsByFeature = {};
+
+        otorisasiData.forEach(otorisasi => {
+            // Convert both to same type for comparison
+            if (parseInt(otorisasi.keyKLP) === parseInt(roleId)) {
+                const checkboxId = `${otorisasi.keyFITUR}_${otorisasi.aksi}`;
+                console.log('Looking for checkbox:', checkboxId, '(keyFITUR:', otorisasi.keyFITUR, 'type:', typeof otorisasi.keyFITUR, ')');
+                const checkbox = $(`#${checkboxId}`);
+                if (checkbox.length > 0) {
+
+                    checkbox.prop('checked', true);
+                    permissionsFound++;
+
+                    // Track permissions by feature
+                    if (!permissionsByFeature[otorisasi.keyFITUR]) {
+                        permissionsByFeature[otorisasi.keyFITUR] = [];
+                    }
+                    permissionsByFeature[otorisasi.keyFITUR].push(otorisasi.aksi);
+                } else {
+
+                    // Debug: check if any checkbox with similar ID exists
+                    const similarCheckboxes = $(`[id*="${otorisasi.keyFITUR}"]`);
+
+                }
+            }
+        });
+
+        // Ensure view permission is checked if any other permission is checked for a feature
+        Object.keys(permissionsByFeature).forEach(featureKey => {
+            const permissions = permissionsByFeature[featureKey];
+            const hasOtherPermissions = permissions.some(p => p !== 'view');
+
+            if (hasOtherPermissions && !permissions.includes('view')) {
+                const viewCheckbox = $(`#${featureKey}_view`);
+                if (viewCheckbox.length > 0) {
+                    viewCheckbox.prop('checked', true);
+
+                }
+            }
+        });
+
+    }
+
+    function handleFormSubmission() {
+        const roleId = $('#roleId').val();
+        const roleName = $('#modalRoleName').val().trim();
+
+        if (!roleName) {
+            alert('Nama peran wajib diisi');
+            return;
+        }
+
+        // Collect permissions
+        const permissions = [];
+        $('.permission-checkbox:checked').each(function() {
+            const idParts = $(this).attr('id').split('_');
+            if (idParts.length === 2) {
+                permissions.push({
+                    keyFITUR: idParts[0],
+                    aksi: idParts[1]
+                });
+            }
+        });
+
+        // Prepare data for submission
+        const submitData = {
+            roleId: roleId || null,
+            roleName: roleName,
+            permissions: permissions
+        };
+
+        // Submit data
+        submitRoleData(submitData);
+    }
+
+    function submitRoleData(data) {
+        const isEdit = !!data.roleId;
+        const url = isEdit ? '/otorisasi/updateRole' : '/otorisasi/createRole';
+        const method = isEdit ? 'PUT' : 'POST';
+
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+
+                if (response.success) {
+                    $('#addRoleModal').modal('hide');
+                    alert(isEdit ? 'Peran berhasil diperbarui' : 'Peran berhasil dibuat');
+                    location.reload(); // Reload to show updated data
+                } else {
+                    alert('Error: ' + (response.message || 'Terjadi kesalahan tidak diketahui'));
+                }
+            },
+            error: function(xhr, status, error) {
+
+                alert('Error menyimpan peran: ' + error + '\nStatus: ' + xhr.status + '\nResponse: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function showMessage(type, title, message) {
+        if (window.Swal) {
+            Swal.fire(title, message, type);
+            return;
+        }
+        alert((title ? title + ': ' : '') + message);
+    }
+
+    function confirmDeleteRole(roleName, callback) {
+        const message = `Yakin ingin menghapus peran "${roleName}"? Hak akses peran ini juga akan dihapus.`;
+
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Konfirmasi Hapus',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Hapus',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#d33'
+            }).then(function(result) {
+                if (result.isConfirmed) callback();
+            });
+            return;
+        }
+
+        if (confirm(message)) callback();
+    }
+
+    function deleteRole(roleId, roleName, userCount) {
+        if (!roleId) return;
+
+        if (userCount > 0) {
+            showMessage('warning', 'Tidak Bisa Dihapus', 'Peran masih digunakan oleh ' + userCount + ' pengguna.');
+            return;
+        }
+
+        confirmDeleteRole(roleName, function() {
+            $.ajax({
+                url: '/otorisasi/deleteRole/' + roleId,
+                method: 'DELETE',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        showMessage('success', 'Berhasil', response.message || 'Peran berhasil dihapus');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 700);
+                    } else {
+                        showMessage('error', 'Gagal', response.message || 'Gagal menghapus peran');
+                    }
+                },
+                error: function(xhr) {
+                    const message = (xhr.responseJSON && xhr.responseJSON.message) || xhr.responseText || 'Terjadi kesalahan saat menghapus peran';
+                    showMessage('error', 'Gagal', message);
+                }
+            });
+        });
+    }
+
+    // Handle select all functionality for permissions
+    $('#selectAll').off('change.otorisasi').on('change.otorisasi', function() {
+        const isChecked = $(this).is(':checked');
+        $('.permission-checkbox').prop('checked', isChecked);
+    });
+
+    // Update select all checkbox based on individual checkboxes
+    $(document).on('change.otorisasi', '.permission-checkbox', function() {
+        const totalCheckboxes = $('.permission-checkbox').length;
+        const checkedCheckboxes = $('.permission-checkbox:checked').length;
+        $('#selectAll').prop('checked', totalCheckboxes === checkedCheckboxes);
+    });
+    
+    })(); // Akhir IIFE
+    </script>

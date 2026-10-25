@@ -1,0 +1,60 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+  <div class="row">
+    <div class="col-12 mb-4">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <h4 class="card-title text-white mb-2">Halo, <%= username %></h4>
+          <p class="card-text mb-0"><%= subtitle %><% if (nmKLP) { %> &middot; Kelompok: <strong><%= nmKLP %></strong><% } %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body d-flex align-items-center">
+          <span class="avatar-initial rounded bg-label-primary p-3 me-3"><i class="bx bx-user bx-md"></i></span>
+          <div>
+            <small class="text-muted d-block">User</small>
+            <h4 class="mb-0"><%= stats.totalUser || 0 %></h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body d-flex align-items-center">
+          <span class="avatar-initial rounded bg-label-success p-3 me-3"><i class="bx bx-group bx-md"></i></span>
+          <div>
+            <small class="text-muted d-block">Kelompok</small>
+            <h4 class="mb-0"><%= stats.totalKelompok || 0 %></h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body d-flex align-items-center">
+          <span class="avatar-initial rounded bg-label-info p-3 me-3"><i class="bx bx-menu bx-md"></i></span>
+          <div>
+            <small class="text-muted d-block">Fitur / Menu</small>
+            <h4 class="mb-0"><%= stats.totalFitur || 0 %></h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Mulai dari sini</h5>
+          <ul class="mb-0">
+            <li>Buat tabel baru lewat file SQL di <code>migrations/</code>, lalu jalankan <code>npm run db:migrate</code>.</li>
+            <li>Buka menu <strong>Generate Module</strong> untuk membuat controller + view CRUD dari tabel tersebut.</li>
+            <li>Daftarkan modul di menu <strong>Fitur</strong>, lalu beri hak akses di <strong>Otorisasi</strong>.</li>
+            <li>Lihat modul <strong>Contoh</strong> sebagai referensi CRUD dengan DataTables server-side.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

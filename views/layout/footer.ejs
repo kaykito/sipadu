@@ -1,0 +1,839 @@
+<footer class="content-footer footer bg-footer-theme mt-auto">
+  <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+    <div class="mb-2 mb-md-0">
+      © <script>document.write(new Date().getFullYear());</script>
+      <span class="fw-bolder"><%= typeof nameapp !== 'undefined' ? nameapp : '' %></span>
+    </div>
+  </div>
+</footer>
+<div class="content-backdrop fade"></div>
+</div>
+<!-- / Layout page -->
+</div>
+
+<!-- Overlay -->
+<div class="layout-overlay layout-menu-toggle"></div>
+
+<!-- Drag Target Area To SlideIn Menu On Small Screens -->
+<div class="drag-target"></div>
+</div>
+<!-- / Layout wrapper -->
+
+<!-- Main JS -->
+<script src="/assets/js/main.js"></script>
+<script src="/assets/js/app-money.js"></script>
+
+<script>
+  
+  // ============================================
+  // HELPER FUNCTIONS
+  // ============================================
+
+  /**
+   * Format tanggal ke format Indonesia
+   * @param {Date|string} tgl - Tanggal yang akan diformat
+   * @returns {string} Tanggal dalam format Indonesia atau '-' jika null
+   */
+  function formatTanggalIndo(tgl) {
+    if (!tgl) return '-';
+    const dateObj = typeof tgl === 'string' ? new Date(tgl) : tgl;
+    return dateObj.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  }
+
+</script>
+
+
+<script src="/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+
+<!-- Page Skeleton Loading Styles -->
+<style>
+  /* Page Skeleton Loading */
+  .page-skeleton {
+    padding: 1.5rem;
+    opacity: 0;
+    animation: skeletonFadeIn 0.4s ease-out forwards;
+  }
+
+  .page-skeleton .skeleton-header {
+    margin-bottom: 2rem;
+    animation: skeletonSlideIn 0.6s ease-out 0.1s both;
+  }
+
+  .page-skeleton .skeleton-title {
+    height: 2rem;
+    width: 200px;
+    background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 20%, #f0f0f0 40%, #e0e0e0 60%, #f0f0f0 80%, #e0e0e0 100%);
+    background-size: 300% 100%;
+    animation: skeletonShimmer 2s ease-in-out infinite, skeletonPulse 3s ease-in-out infinite;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    transform: translateY(10px);
+    animation-fill-mode: both;
+  }
+
+  .page-skeleton .skeleton-title:nth-child(1) {
+    animation-delay: 0.1s, 0.1s;
+  }
+
+  .page-skeleton .skeleton-subtitle {
+    height: 1.2rem;
+    width: 150px;
+    background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 20%, #f0f0f0 40%, #e0e0e0 60%, #f0f0f0 80%, #e0e0e0 100%);
+    background-size: 300% 100%;
+    animation: skeletonShimmer 2.2s ease-in-out infinite, skeletonPulse 3.2s ease-in-out infinite;
+    border-radius: 4px;
+    opacity: 0.7;
+    transform: translateY(10px);
+    animation-fill-mode: both;
+    animation-delay: 0.2s, 0.2s;
+  }
+
+  .page-skeleton .skeleton-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    animation: skeletonSlideIn 0.6s ease-out 0.3s both;
+  }
+
+  .page-skeleton .skeleton-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .page-skeleton .skeleton-card-title {
+    height: 1.5rem;
+    width: 180px;
+    background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 20%, #f0f0f0 40%, #e0e0e0 60%, #f0f0f0 80%, #e0e0e0 100%);
+    background-size: 300% 100%;
+    animation: skeletonShimmer 2.1s ease-in-out infinite, skeletonPulse 3.1s ease-in-out infinite;
+    border-radius: 4px;
+    transform: translateY(8px);
+    animation-fill-mode: both;
+    animation-delay: 0.4s, 0.4s;
+  }
+
+  .page-skeleton .skeleton-button {
+    height: 2.25rem;
+    width: 120px;
+    background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 20%, #f0f0f0 40%, #e0e0e0 60%, #f0f0f0 80%, #e0e0e0 100%);
+    background-size: 300% 100%;
+    animation: skeletonShimmer 2.3s ease-in-out infinite, skeletonPulse 3.3s ease-in-out infinite;
+    border-radius: 0.375rem;
+    transform: translateY(8px);
+    animation-fill-mode: both;
+    animation-delay: 0.5s, 0.5s;
+  }
+
+  .page-skeleton .skeleton-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    animation: skeletonSlideIn 0.6s ease-out 0.6s both;
+  }
+
+  .page-skeleton .skeleton-filter {
+    height: 2.5rem;
+    width: 200px;
+    background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 20%, #f0f0f0 40%, #e0e0e0 60%, #f0f0f0 80%, #e0e0e0 100%);
+    background-size: 300% 100%;
+    animation: skeletonShimmer 2.4s ease-in-out infinite, skeletonPulse 3.4s ease-in-out infinite;
+    border-radius: 0.375rem;
+    transform: translateY(8px);
+    animation-fill-mode: both;
+  }
+
+  .page-skeleton .skeleton-filter:nth-child(1) { animation-delay: 0.7s, 0.7s; }
+  .page-skeleton .skeleton-filter:nth-child(2) { animation-delay: 0.8s, 0.8s; }
+  .page-skeleton .skeleton-filter:nth-child(3) { animation-delay: 0.9s, 0.9s; }
+
+  .page-skeleton .skeleton-table {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    animation: skeletonSlideIn 0.6s ease-out 1s both;
+  }
+
+  .page-skeleton .skeleton-table-header {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    gap: 1rem;
+  }
+
+  .page-skeleton .skeleton-table-header-item {
+    height: 1.2rem;
+    background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 20%, #f0f0f0 40%, #e0e0e0 60%, #f0f0f0 80%, #e0e0e0 100%);
+    background-size: 300% 100%;
+    animation: skeletonShimmer 2.5s ease-in-out infinite, skeletonPulse 3.5s ease-in-out infinite;
+    border-radius: 4px;
+    transform: translateY(6px);
+    animation-fill-mode: both;
+    animation-delay: 1.1s, 1.1s;
+  }
+
+  .page-skeleton .skeleton-table-body {
+    padding: 0.75rem;
+  }
+
+  .page-skeleton .skeleton-table-row {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    animation: skeletonSlideIn 0.5s ease-out both;
+  }
+
+  .page-skeleton .skeleton-table-row:nth-child(1) { animation-delay: 1.2s; }
+  .page-skeleton .skeleton-table-row:nth-child(2) { animation-delay: 1.3s; }
+  .page-skeleton .skeleton-table-row:nth-child(3) { animation-delay: 1.4s; }
+  .page-skeleton .skeleton-table-row:nth-child(4) { animation-delay: 1.5s; }
+  .page-skeleton .skeleton-table-row:nth-child(5) { animation-delay: 1.6s; }
+  .page-skeleton .skeleton-table-row:nth-child(6) { animation-delay: 1.7s; }
+  .page-skeleton .skeleton-table-row:nth-child(7) { animation-delay: 1.8s; }
+  .page-skeleton .skeleton-table-row:nth-child(8) { animation-delay: 1.9s; }
+
+  .page-skeleton .skeleton-table-row:last-child {
+    border-bottom: none;
+  }
+
+  .page-skeleton .skeleton-table-cell {
+    height: 1rem;
+    background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 20%, #f0f0f0 40%, #e0e0e0 60%, #f0f0f0 80%, #e0e0e0 100%);
+    background-size: 300% 100%;
+    animation: skeletonShimmer 2.6s ease-in-out infinite, skeletonPulse 3.6s ease-in-out infinite;
+    border-radius: 4px;
+    transform: translateY(4px);
+    animation-fill-mode: both;
+  }
+
+  /* Enhanced Animations */
+  @keyframes skeletonFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes skeletonSlideIn {
+    0% {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes skeletonShimmer {
+    0% {
+      background-position: -300% 0;
+    }
+    100% {
+      background-position: 300% 0;
+    }
+  }
+
+  @keyframes skeletonPulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  /* Skeleton variations */
+  .page-skeleton.dashboard .skeleton-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    animation: skeletonSlideIn 0.6s ease-out 0.8s both;
+  }
+
+  .page-skeleton.dashboard .skeleton-chart {
+    height: 300px;
+    background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 20%, #f0f0f0 40%, #e0e0e0 60%, #f0f0f0 80%, #e0e0e0 100%);
+    background-size: 300% 100%;
+    animation: skeletonShimmer 2.7s ease-in-out infinite, skeletonPulse 3.7s ease-in-out infinite;
+    border-radius: 0.5rem;
+    transform: translateY(10px);
+    animation-fill-mode: both;
+  }
+
+  .page-skeleton.dashboard .skeleton-chart:nth-child(1) { animation-delay: 0.9s, 0.9s; }
+  .page-skeleton.dashboard .skeleton-chart:nth-child(2) { animation-delay: 1s, 1s; }
+  .page-skeleton.dashboard .skeleton-chart:nth-child(3) { animation-delay: 1.1s, 1.1s; }
+  .page-skeleton.dashboard .skeleton-chart:nth-child(4) { animation-delay: 1.2s, 1.2s; }
+
+  .page-skeleton.form .skeleton-form-group {
+    margin-bottom: 1.5rem;
+    animation: skeletonSlideIn 0.5s ease-out both;
+  }
+
+  .page-skeleton.form .skeleton-form-group:nth-child(1) { animation-delay: 0.4s; }
+  .page-skeleton.form .skeleton-form-group:nth-child(2) { animation-delay: 0.5s; }
+  .page-skeleton.form .skeleton-form-group:nth-child(3) { animation-delay: 0.6s; }
+  .page-skeleton.form .skeleton-form-group:nth-child(4) { animation-delay: 0.7s; }
+  .page-skeleton.form .skeleton-form-group:nth-child(5) { animation-delay: 0.8s; }
+  .page-skeleton.form .skeleton-form-group:nth-child(6) { animation-delay: 0.9s; }
+
+  .page-skeleton.form .skeleton-form-label {
+    height: 1rem;
+    width: 100px;
+    background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 20%, #f0f0f0 40%, #e0e0e0 60%, #f0f0f0 80%, #e0e0e0 100%);
+    background-size: 300% 100%;
+    animation: skeletonShimmer 2.8s ease-in-out infinite, skeletonPulse 3.8s ease-in-out infinite;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    transform: translateY(6px);
+    animation-fill-mode: both;
+  }
+
+  .page-skeleton.form .skeleton-form-input {
+    height: 2.5rem;
+    width: 100%;
+    background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 20%, #f0f0f0 40%, #e0e0e0 60%, #f0f0f0 80%, #e0e0e0 100%);
+    background-size: 300% 100%;
+    animation: skeletonShimmer 2.9s ease-in-out infinite, skeletonPulse 3.9s ease-in-out infinite;
+    border-radius: 0.375rem;
+    transform: translateY(6px);
+    animation-fill-mode: both;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .page-skeleton .skeleton-filters {
+      flex-direction: column;
+    }
+
+    .page-skeleton .skeleton-filter {
+      width: 100%;
+    }
+
+    .page-skeleton .skeleton-table-header,
+    .page-skeleton .skeleton-table-row {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .page-skeleton.dashboard .skeleton-charts {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Smooth transitions for content replacement */
+  #content-wrapper {
+    transition: opacity 0.3s ease-out;
+  }
+
+  #content-wrapper.fade-out {
+    opacity: 0;
+  }
+</style>
+
+<!-- Page Skeleton Loading Functions -->
+<script>
+  // ============================================
+  // PAGE SKELETON LOADING FUNCTIONS
+  // ============================================
+
+  /**
+   * Membuat skeleton loading untuk halaman berdasarkan tipe
+   * @param {string} pageType - Tipe halaman ('dashboard', 'table', 'form', 'detail')
+   * @returns {string} HTML skeleton
+   */
+  function createPageSkeleton(pageType = 'table') {
+    const baseSkeleton = `
+      <div class="page-skeleton ${pageType}">
+        <div class="skeleton-header">
+          <div class="skeleton-title"></div>
+          <div class="skeleton-subtitle"></div>
+        </div>
+    `;
+
+    let contentSkeleton = '';
+
+    switch(pageType) {
+      case 'dashboard':
+        contentSkeleton = `
+          <div class="skeleton-charts">
+            <div class="skeleton-chart"></div>
+            <div class="skeleton-chart"></div>
+            <div class="skeleton-chart"></div>
+            <div class="skeleton-chart"></div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-card-header">
+              <div class="skeleton-card-title"></div>
+              <div class="skeleton-button"></div>
+            </div>
+            <div class="skeleton-table">
+              <div class="skeleton-table-header">
+                <div class="skeleton-table-header-item" style="width: 20%;"></div>
+                <div class="skeleton-table-header-item" style="width: 25%;"></div>
+                <div class="skeleton-table-header-item" style="width: 15%;"></div>
+                <div class="skeleton-table-header-item" style="width: 15%;"></div>
+                <div class="skeleton-table-header-item" style="width: 10%;"></div>
+              </div>
+              <div class="skeleton-table-body">
+                ${Array(5).fill().map(() => `
+                  <div class="skeleton-table-row">
+                    <div class="skeleton-table-cell" style="width: 20%;"></div>
+                    <div class="skeleton-table-cell" style="width: 25%;"></div>
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 10%;"></div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+        break;
+
+      case 'form':
+        contentSkeleton = `
+          <div class="skeleton-card">
+            <div class="skeleton-card-header">
+              <div class="skeleton-card-title"></div>
+            </div>
+            <div class="row">
+              ${Array(6).fill().map(() => `
+                <div class="col-md-6">
+                  <div class="skeleton-form-group">
+                    <div class="skeleton-form-label"></div>
+                    <div class="skeleton-form-input"></div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+              <div class="skeleton-button" style="width: 80px;"></div>
+              <div class="skeleton-button" style="width: 100px;"></div>
+            </div>
+          </div>
+        `;
+        break;
+
+      case 'detail':
+        contentSkeleton = `
+          <div class="skeleton-card">
+            <div class="skeleton-card-header">
+              <div class="skeleton-card-title"></div>
+              <div class="skeleton-button"></div>
+            </div>
+            <div class="row">
+              ${Array(4).fill().map(() => `
+                <div class="col-md-6">
+                  <div class="skeleton-form-group">
+                    <div class="skeleton-form-label"></div>
+                    <div class="skeleton-form-input"></div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-card-header">
+              <div class="skeleton-card-title"></div>
+              <div class="skeleton-button"></div>
+            </div>
+            <div class="skeleton-table">
+              <div class="skeleton-table-header">
+                <div class="skeleton-table-header-item" style="width: 15%;"></div>
+                <div class="skeleton-table-header-item" style="width: 30%;"></div>
+                <div class="skeleton-table-header-item" style="width: 20%;"></div>
+                <div class="skeleton-table-header-item" style="width: 15%;"></div>
+                <div class="skeleton-table-header-item" style="width: 10%;"></div>
+              </div>
+              <div class="skeleton-table-body">
+                ${Array(3).fill().map(() => `
+                  <div class="skeleton-table-row">
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 30%;"></div>
+                    <div class="skeleton-table-cell" style="width: 20%;"></div>
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 10%;"></div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+        break;
+
+      default: // 'table' - default case
+        contentSkeleton = `
+          <div class="skeleton-card">
+            <div class="skeleton-card-header">
+              <div class="skeleton-card-title"></div>
+              <div class="skeleton-button"></div>
+            </div>
+            <div class="skeleton-filters">
+              <div class="skeleton-filter"></div>
+              <div class="skeleton-filter"></div>
+              <div class="skeleton-filter"></div>
+            </div>
+            <div class="skeleton-table">
+              <div class="skeleton-table-header">
+                <div class="skeleton-table-header-item" style="width: 5%;"></div>
+                <div class="skeleton-table-header-item" style="width: 20%;"></div>
+                <div class="skeleton-table-header-item" style="width: 15%;"></div>
+                <div class="skeleton-table-header-item" style="width: 15%;"></div>
+                <div class="skeleton-table-header-item" style="width: 15%;"></div>
+                <div class="skeleton-table-header-item" style="width: 10%;"></div>
+                <div class="skeleton-table-header-item" style="width: 10%;"></div>
+              </div>
+              <div class="skeleton-table-body">
+                ${Array(8).fill().map(() => `
+                  <div class="skeleton-table-row">
+                    <div class="skeleton-table-cell" style="width: 5%;"></div>
+                    <div class="skeleton-table-cell" style="width: 20%;"></div>
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 10%;"></div>
+                    <div class="skeleton-table-cell" style="width: 10%;"></div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+    }
+
+    return baseSkeleton + contentSkeleton + '</div>';
+  }
+
+  /**
+   * Menampilkan skeleton loading untuk halaman
+   * @param {string} pageType - Tipe halaman yang akan dimuat
+   */
+  function showPageSkeleton(pageType = 'table') {
+    // Fade out current content smoothly
+    $('#content-wrapper').addClass('fade-out');
+
+    setTimeout(() => {
+      const skeletonHtml = createPageSkeleton(pageType);
+      $('#content-wrapper').html(skeletonHtml).removeClass('fade-out');
+    }, 150);
+  }
+
+  /**
+   * Menyembunyikan skeleton loading dengan transisi smooth
+   * @param {string} newContent - Konten baru yang akan diganti
+   */
+  function hidePageSkeleton(newContent) {
+    const $wrapper = $('#content-wrapper');
+
+    // Add fade effect before replacing content
+    $wrapper.addClass('fade-out');
+
+    setTimeout(() => {
+      $wrapper.html(newContent).removeClass('fade-out');
+    }, 200);
+  }
+
+  // ============================================
+  // ENHANCED LOADING FUNCTIONS
+  // ============================================
+
+  /**
+   * Membuat skeleton dengan efek stagger yang lebih smooth
+   * @param {string} pageType - Tipe halaman
+   * @returns {string} HTML skeleton dengan stagger effects
+   */
+  function createPageSkeleton(pageType = 'table') {
+    const baseSkeleton = `
+      <div class="page-skeleton ${pageType}" style="animation-delay: 0s;">
+        <div class="skeleton-header" style="animation-delay: 0.1s;">
+          <div class="skeleton-title" style="animation-delay: 0.1s;"></div>
+          <div class="skeleton-subtitle" style="animation-delay: 0.2s;"></div>
+        </div>
+    `;
+
+    let contentSkeleton = '';
+
+    switch(pageType) {
+      case 'dashboard':
+        contentSkeleton = `
+          <div class="skeleton-charts" style="animation-delay: 0.8s;">
+            <div class="skeleton-chart" style="animation-delay: 0.9s;"></div>
+            <div class="skeleton-chart" style="animation-delay: 1s;"></div>
+            <div class="skeleton-chart" style="animation-delay: 1.1s;"></div>
+            <div class="skeleton-chart" style="animation-delay: 1.2s;"></div>
+          </div>
+          <div class="skeleton-card" style="animation-delay: 0.3s;">
+            <div class="skeleton-card-header">
+              <div class="skeleton-card-title" style="animation-delay: 0.4s;"></div>
+              <div class="skeleton-button" style="animation-delay: 0.5s;"></div>
+            </div>
+            <div class="skeleton-table" style="animation-delay: 1s;">
+              <div class="skeleton-table-header">
+                <div class="skeleton-table-header-item" style="width: 20%; animation-delay: 1.1s;"></div>
+                <div class="skeleton-table-header-item" style="width: 25%; animation-delay: 1.1s;"></div>
+                <div class="skeleton-table-header-item" style="width: 15%; animation-delay: 1.1s;"></div>
+                <div class="skeleton-table-header-item" style="width: 15%; animation-delay: 1.1s;"></div>
+                <div class="skeleton-table-header-item" style="width: 10%; animation-delay: 1.1s;"></div>
+              </div>
+              <div class="skeleton-table-body">
+                ${Array(5).fill().map((_, i) => `
+                  <div class="skeleton-table-row" style="animation-delay: ${1.2 + i * 0.1}s;">
+                    <div class="skeleton-table-cell" style="width: 20%;"></div>
+                    <div class="skeleton-table-cell" style="width: 25%;"></div>
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 10%;"></div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+        break;
+
+      case 'form':
+        contentSkeleton = `
+          <div class="skeleton-card" style="animation-delay: 0.3s;">
+            <div class="skeleton-card-header">
+              <div class="skeleton-card-title" style="animation-delay: 0.4s;"></div>
+            </div>
+            <div class="row">
+              ${Array(6).fill().map((_, i) => `
+                <div class="col-md-6">
+                  <div class="skeleton-form-group" style="animation-delay: ${0.4 + i * 0.1}s;">
+                    <div class="skeleton-form-label"></div>
+                    <div class="skeleton-form-input"></div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+              <div class="skeleton-button" style="width: 80px; animation-delay: 1.1s;"></div>
+              <div class="skeleton-button" style="width: 100px; animation-delay: 1.2s;"></div>
+            </div>
+          </div>
+        `;
+        break;
+
+      case 'detail':
+        contentSkeleton = `
+          <div class="skeleton-card" style="animation-delay: 0.3s;">
+            <div class="skeleton-card-header">
+              <div class="skeleton-card-title" style="animation-delay: 0.4s;"></div>
+              <div class="skeleton-button" style="animation-delay: 0.5s;"></div>
+            </div>
+            <div class="row">
+              ${Array(4).fill().map((_, i) => `
+                <div class="col-md-6">
+                  <div class="skeleton-form-group" style="animation-delay: ${0.5 + i * 0.1}s;">
+                    <div class="skeleton-form-label"></div>
+                    <div class="skeleton-form-input"></div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="skeleton-card" style="animation-delay: 0.9s;">
+            <div class="skeleton-card-header">
+              <div class="skeleton-card-title" style="animation-delay: 1s;"></div>
+              <div class="skeleton-button" style="animation-delay: 1.1s;"></div>
+            </div>
+            <div class="skeleton-table" style="animation-delay: 1.2s;">
+              <div class="skeleton-table-header">
+                <div class="skeleton-table-header-item" style="width: 15%; animation-delay: 1.3s;"></div>
+                <div class="skeleton-table-header-item" style="width: 30%; animation-delay: 1.3s;"></div>
+                <div class="skeleton-table-header-item" style="width: 20%; animation-delay: 1.3s;"></div>
+                <div class="skeleton-table-header-item" style="width: 15%; animation-delay: 1.3s;"></div>
+                <div class="skeleton-table-header-item" style="width: 10%; animation-delay: 1.3s;"></div>
+              </div>
+              <div class="skeleton-table-body">
+                ${Array(3).fill().map((_, i) => `
+                  <div class="skeleton-table-row" style="animation-delay: ${1.4 + i * 0.1}s;">
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 30%;"></div>
+                    <div class="skeleton-table-cell" style="width: 20%;"></div>
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 10%;"></div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+        break;
+
+      default: // 'table' - default case
+        contentSkeleton = `
+          <div class="skeleton-card" style="animation-delay: 0.3s;">
+            <div class="skeleton-card-header">
+              <div class="skeleton-card-title" style="animation-delay: 0.4s;"></div>
+              <div class="skeleton-button" style="animation-delay: 0.5s;"></div>
+            </div>
+            <div class="skeleton-filters" style="animation-delay: 0.6s;">
+              <div class="skeleton-filter" style="animation-delay: 0.7s;"></div>
+              <div class="skeleton-filter" style="animation-delay: 0.8s;"></div>
+              <div class="skeleton-filter" style="animation-delay: 0.9s;"></div>
+            </div>
+            <div class="skeleton-table" style="animation-delay: 1s;">
+              <div class="skeleton-table-header">
+                <div class="skeleton-table-header-item" style="width: 5%; animation-delay: 1.1s;"></div>
+                <div class="skeleton-table-header-item" style="width: 20%; animation-delay: 1.1s;"></div>
+                <div class="skeleton-table-header-item" style="width: 15%; animation-delay: 1.1s;"></div>
+                <div class="skeleton-table-header-item" style="width: 15%; animation-delay: 1.1s;"></div>
+                <div class="skeleton-table-header-item" style="width: 15%; animation-delay: 1.1s;"></div>
+                <div class="skeleton-table-header-item" style="width: 10%; animation-delay: 1.1s;"></div>
+                <div class="skeleton-table-header-item" style="width: 10%; animation-delay: 1.1s;"></div>
+              </div>
+              <div class="skeleton-table-body">
+                ${Array(8).fill().map((_, i) => `
+                  <div class="skeleton-table-row" style="animation-delay: ${1.2 + i * 0.08}s;">
+                    <div class="skeleton-table-cell" style="width: 5%;"></div>
+                    <div class="skeleton-table-cell" style="width: 20%;"></div>
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 15%;"></div>
+                    <div class="skeleton-table-cell" style="width: 10%;"></div>
+                    <div class="skeleton-table-cell" style="width: 10%;"></div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+    }
+
+    return baseSkeleton + contentSkeleton + '</div>';
+  }
+</script>
+
+<script src="/assets/js/spa-core.js"></script>
+
+<script>
+  (function setupAutoLogoutIdle() {
+    var IDLE_TIMEOUT_MS = 3 * 60 * 1000; // 3 menit
+    var WARNING_BEFORE_MS = 30 * 1000; // tampilkan warning 30 detik sebelum logout
+    var WARNING_START_SECONDS = 30;
+    var idleTimer = null;
+    var warningTimer = null;
+    var countdownInterval = null;
+    var hasLoggedOut = false;
+    var warningSecondsLeft = WARNING_START_SECONDS;
+
+    function ensureWarningModal() {
+      if (document.getElementById('idleWarningModal')) return;
+
+      var modalHtml = [
+        '<div id="idleWarningModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;padding:16px;">',
+          '<div style="width:100%;max-width:420px;background:#fff;border-radius:12px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,0.2);">',
+            '<h5 style="margin:0 0 10px 0;">Peringatan Sesi</h5>',
+            '<p style="margin:0 0 16px 0;">Anda akan logout otomatis dalam <strong id="idleWarningCountdown">30</strong> detik karena tidak ada aktivitas.</p>',
+            '<div style="display:flex;justify-content:flex-end;gap:10px;">',
+              '<button id="stayLoggedInBtn" type="button" class="btn btn-primary">Tetap Login</button>',
+            '</div>',
+          '</div>',
+        '</div>'
+      ].join('');
+
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+      var stayBtn = document.getElementById('stayLoggedInBtn');
+      if (stayBtn) {
+        stayBtn.addEventListener('click', function () {
+          hideWarning();
+          resetIdleTimer();
+        });
+      }
+    }
+
+    function showWarning() {
+      if (hasLoggedOut) return;
+      ensureWarningModal();
+      warningSecondsLeft = WARNING_START_SECONDS;
+
+      var modal = document.getElementById('idleWarningModal');
+      var countdownEl = document.getElementById('idleWarningCountdown');
+      if (!modal || !countdownEl) return;
+
+      modal.style.display = 'flex';
+      countdownEl.textContent = String(warningSecondsLeft);
+
+      if (countdownInterval) clearInterval(countdownInterval);
+      countdownInterval = setInterval(function () {
+        warningSecondsLeft -= 1;
+        if (warningSecondsLeft <= 0) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+          warningSecondsLeft = 0;
+          countdownEl.textContent = '0';
+          return;
+        }
+        countdownEl.textContent = String(warningSecondsLeft);
+      }, 1000);
+    }
+
+    function hideWarning() {
+      var modal = document.getElementById('idleWarningModal');
+      if (modal) modal.style.display = 'none';
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+      warningSecondsLeft = WARNING_START_SECONDS;
+    }
+
+    function triggerAutoLogout() {
+      if (hasLoggedOut) return;
+      hasLoggedOut = true;
+      hideWarning();
+      window.location.href = '/login/logout';
+    }
+
+    function resetIdleTimer() {
+      if (hasLoggedOut) return;
+      hideWarning();
+      if (idleTimer) {
+        clearTimeout(idleTimer);
+      }
+      if (warningTimer) {
+        clearTimeout(warningTimer);
+      }
+      warningTimer = setTimeout(showWarning, IDLE_TIMEOUT_MS - WARNING_BEFORE_MS);
+      idleTimer = setTimeout(triggerAutoLogout, IDLE_TIMEOUT_MS);
+    }
+
+    ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function (eventName) {
+      window.addEventListener(eventName, resetIdleTimer, { passive: true });
+    });
+
+    window.addEventListener('load', resetIdleTimer);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) resetIdleTimer();
+    });
+  })();
+</script>
+
+
+</body>
+</html>

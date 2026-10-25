@@ -1,0 +1,17 @@
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f8f9fa; padding: 24px;">
+  <div style="max-width: 560px; width: 100%; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 32px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);">
+    <% if (error && error.status === 404) { %>
+      <img
+        src="/assets/img/illustrations/page-misc-error-dark.png"
+        alt="Halaman tidak ditemukan"
+        style="max-width: 100%; width: 320px; height: auto; margin: 0 auto 24px; display: block;" />
+    <% } %>
+    
+    <p style="margin: 0 0 24px; color: #6b7280; line-height: 1.6;">
+      Data belum ada atau tidak ditemukan.
+    </p>
+    <a href="/" style="display: inline-block; padding: 12px 20px; border-radius: 10px; background: #2563eb; color: #ffffff; text-decoration: none; font-weight: 600;">
+      Kembali ke Beranda
+    </a>
+  </div>
+</div>

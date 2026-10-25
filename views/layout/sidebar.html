@@ -1,0 +1,274 @@
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+          <div class="app-brand demo">
+            <a href="/" class="app-brand-link">
+              <span class="app-brand-logo demo sidebar-brand-wrap">
+                <img src="/logo2.png" alt="<%= nameapp %>" class="sidebar-logo app-brand-img" />
+                <img src="/logo1.png" alt="<%= nameapp %>" class="sidebar-logo app-brand-img-collapsed" />
+              </span>
+            </a>
+
+            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+              <i class="bx menu-toggle-icon d-none d-xl-block fs-4 align-middle"></i>
+              <i class="bx bx-x d-block d-xl-none bx-sm align-middle"></i>
+            </a>
+          </div>
+
+          <div class="menu-divider mt-0"></div>
+
+          <div class="menu-inner-shadow"></div>
+
+          <ul class="menu-inner py-1">
+            <% 
+            // Ikon menu level-1 berdasarkan nama FITUR; tambahkan mapping sesuai menu aplikasi Anda
+            function getIcon(nmFITUR) {
+              const icons = {
+                'Dashboard': 'bx-home-circle',
+                'Setting': 'bx-cog',
+                'Contoh': 'bx-table'
+              };
+              return icons[nmFITUR] || 'bx-circle';
+            }
+            %>
+            <% menuArray.forEach(item => { %>
+            <li class="menu-item <%= item.hasSub ? 'has-sub' : '' %>">
+              <a href="/<%= item.url %>" class="menu-link <%= item.hasSub ? 'menu-toggle' : '' %>">
+                <i class="menu-icon tf-icons bx <%= getIcon(item.nmFITUR) %>"></i>
+                <div><%= item.nmFITUR %></div>
+              </a>
+              <% if (item.subMenus && item.subMenus.length > 0) { %>
+              <ul class="menu-sub">
+                <% item.subMenus.forEach(sub => { %>
+                <li class="menu-item <%= sub.hasSub ? 'has-sub' : '' %>">
+                  <a href="/<%= sub.url %>" class="menu-link <%= sub.hasSub ? 'menu-toggle' : '' %>">
+                    <div><%= sub.nmFITUR %></div>
+                  </a>
+                  <% if (sub.subMenus && sub.subMenus.length > 0) { %>
+                  <ul class="menu-sub">
+                    <% sub.subMenus.forEach(sub2 => { %>
+                    <li class="menu-item">
+                      <a href="/<%= sub2.url %>" class="menu-link">
+                        <div><%= sub2.nmFITUR %></div>
+                      </a>
+                    </li>
+                    <% }); %>
+                  </ul>
+                  <% } %>
+                </li>
+                <% }); %>
+              </ul>
+              <% } %>
+            </li>
+            <% }); %>
+          </ul>
+
+          <% 
+            var menuData = { pages: [], files: [], members: [] };
+            menuArray.forEach(item => {
+              menuData.pages.push({ name: item.nmFITUR, url: item.url, icon: getIcon(item.nmFITUR), category: 'Menu' });
+              if (item.subMenus && item.subMenus.length > 0) {
+                item.subMenus.forEach(sub => {
+                  menuData.pages.push({ name: sub.nmFITUR, url: sub.url, icon: 'bx-circle', category: 'Submenu' });
+                  if (sub.subMenus && sub.subMenus.length > 0) {
+                    sub.subMenus.forEach(sub2 => {
+                      menuData.pages.push({ name: sub2.nmFITUR, url: sub2.url, icon: 'bx-circle', category: 'Submenu' });
+                    });
+                  }
+                });
+              }
+            });
+          %>
+          <script>
+            // Set search data from menu
+            window.menuData = <%- JSON.stringify(menuData) %>;
+          </script>
+
+        </aside>
+        <!-- / Menu -->
+
+        <!-- Layout container -->
+        <div class="layout-page">
+          <!-- Navbar -->
+
+          <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar">
+            <div class="container-fluid">
+              <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+                <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+                  <i class="bx bx-menu bx-sm"></i>
+                </a>
+              </div>
+
+              <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+                
+
+                <!-- Breadcrumb -->
+                <div class="navbar-nav align-items-center flex-grow-1 mx-3">
+                  <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-style4 mb-0">
+                     
+                    </ol>
+                  </nav>
+                </div>
+                <!-- /Breadcrumb -->
+                <!-- Search -->
+                <div class="navbar-nav align-items-center">
+                  <div class="nav-item navbar-search-wrapper mb-0">
+                    <a class="nav-item nav-link search-toggler px-0" href="javascript:void(0);">
+                      <i class="bx bx-search-alt bx-sm"></i>
+                      <span class="d-none d-md-inline-block">Cari (Ctrl+/)</span>
+                    </a>
+                  </div>
+                </div>
+                <!-- /Search -->
+                <ul class="navbar-nav flex-row align-items-center ms-auto">
+
+                  <!-- Style Switcher -->
+                  <li class="nav-item dropdown-style-switcher dropdown me-2 me-xl-0">
+                    <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                      <i class="bx bx-sm"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
+                          <span class="align-middle"><i class="bx bx-sun me-2"></i>Light</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
+                          <span class="align-middle"><i class="bx bx-moon me-2"></i>Dark</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0);" data-theme="system">
+                          <span class="align-middle"><i class="bx bx-desktop me-2"></i>System</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                  <!-- / Style Switcher-->
+                  <!-- User -->
+                  <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                    <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                      <div class="avatar avatar-online">
+                        <img src="<%= (typeof user !== 'undefined' && user && user.avatar) ? '/uploads/avatars/' + user.avatar : '/assets/img/avatars/1.jpg' %>" alt class="rounded-circle" />
+                      </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <li>
+                        <a class="dropdown-item" href="#">
+                          <div class="d-flex">
+                            <div class="flex-shrink-0 me-3">
+                              <div class="avatar avatar-online">
+                                <img src="<%= (typeof user !== 'undefined' && user && user.avatar) ? '/uploads/avatars/' + user.avatar : '/assets/img/avatars/1.jpg' %>" alt class="rounded-circle" />
+                              </div>
+                            </div>
+                            <div class="flex-grow-1">
+                              <span class="fw-medium d-block lh-1"><%= (typeof user !== 'undefined' && user) ? (user.nmUSER || user.userID || 'User') : 'User' %></span>
+                              <small><%= nmKLP || '' %></small>
+                            </div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="/userProfile/index">
+                          <i class="bx bx-user me-2"></i>
+                          <span class="align-middle">Profil Saya</span>
+                        </a>
+                      </li>
+
+                      <li>
+                        <a class="dropdown-item" href="/login/logout">
+                          <i class="bx bx-power-off me-2"></i>
+                          <span class="align-middle">Keluar</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                  <!--/ User -->
+                </ul>
+              </div>
+
+              <!-- Search Small Screens -->
+              <div class="navbar-search-wrapper search-input-wrapper container-fluid d-none">
+                <input
+                  type="text"
+                  class="form-control search-input border-0"
+                  placeholder="Search..."
+                  aria-label="Search..." />
+                <i class="bx bx-x bx-sm search-toggler cursor-pointer"></i>
+              </div>
+            </div>
+          </nav>
+
+          <!-- / Navbar -->
+<style>
+  /* Sidebar Footer Styles */
+  #layout-menu {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  #layout-menu .app-brand,
+  #layout-menu .menu-divider,
+  #layout-menu .menu-inner-shadow {
+    flex-shrink: 0;
+  }
+
+  #layout-menu .menu-inner {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 0.5rem;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    position: relative;
+    flex-shrink: 0;
+    background: inherit;
+    z-index: 1;
+  }
+
+  .sidebar-footer .avatar-sm {
+    width: 32px;
+    height: 32px;
+  }
+
+  .sidebar-footer .badge-sm {
+    font-size: 0.625rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  /* Collapsed sidebar adjustments */
+  .layout-menu-collapsed .sidebar-footer {
+    padding: 0.5rem !important;
+  }
+
+  .layout-menu-collapsed .sidebar-footer > div:first-child,
+  .layout-menu-collapsed .sidebar-footer .card {
+    display: none !important;
+  }
+
+  .layout-menu-collapsed .sidebar-footer .avatar {
+    margin: 0 auto !important;
+  }
+
+  .layout-menu-collapsed .sidebar-footer .user-info,
+  .layout-menu-collapsed .sidebar-footer .user-dropdown {
+    display: none !important;
+  }
+
+  /* Smooth transitions */
+  .sidebar-footer,
+  .sidebar-footer .avatar,
+  .sidebar-footer > div,
+  .sidebar-footer .card,
+  .sidebar-footer .user-info,
+  .sidebar-footer .user-dropdown {
+    transition: all 0.3s ease;
+  }
+</style>

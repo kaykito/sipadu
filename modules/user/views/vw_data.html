@@ -1,0 +1,500 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+
+  <!-- Alert untuk notifikasi -->
+  <% if (typeof success_msg !== 'undefined' && success_msg) { %>
+  <div class="alert alert-success alert-dismissible" role="alert">
+    <%= success_msg %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+  </div>
+  <% } %>
+  
+  <% if (typeof error_msg !== 'undefined' && error_msg) { %>
+  <div class="alert alert-danger alert-dismissible" role="alert">
+    <%= error_msg %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+  </div>
+  <% } %>
+
+
+  <!-- Card daftar pengguna -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><%= subtitle %></h5>
+      <div>
+        <button type="button" class="btn btn-primary" onclick="openAddUser()">
+          <i class="bx bx-plus me-1"></i> Tambah User
+        </button>
+      </div>
+    </div>
+    
+    <div class="card-body">
+      <!-- Filter dan pencarian -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text"><i class="bx bx-search"></i></span>
+            <input type="text" id="searchInput" class="form-control" placeholder="Cari user..." />
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="roleFilter">
+            <option value="">Semua Kelompok</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="statusFilter">
+            <option value="">Semua Status</option>
+            <option value="1">Aktif</option>
+            <option value="0">Non-Aktif</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Tabel data user -->
+      <div class="table-responsive text-nowrap">
+        <table class="datatables-basic table table-sm table-bordered" id="userTable">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Username</th>
+              <th>Nama</th>
+              <th>Kelompok</th>
+              <th>Ket</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data user akan diisi oleh DataTables -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Konfirmasi Hapus</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <p>Apakah Anda yakin ingin menghapus user ini?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Hapus</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal User Form -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="userModalTitle">Tambah User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formUser">
+          <input type="hidden" id="userID_old" name="userID_old">
+          <div class="mb-3">
+            <label for="userID" class="form-label">Username <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="userID" name="userID" required maxlength="50" placeholder="Username">
+          </div>
+          <div class="mb-3">
+            <label for="PWD" class="form-label">Password <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="PWD" name="PWD" required minlength="6" maxlength="256" placeholder="Password">
+          </div>
+          <div class="mb-3">
+            <label for="PWD2" class="form-label">Ulangi Password <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="PWD2" name="PWD2" required minlength="6" maxlength="256" placeholder="Ulangi Password">
+          </div>
+          <div class="mb-3">
+            <label for="nmUSER" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="nmUSER" name="nmUSER" required maxlength="100" placeholder="Nama Lengkap">
+          </div>
+          <div class="mb-3">
+            <label for="keyKLP" class="form-label">Kelompok <span class="text-danger">*</span></label>
+            <select class="form-control" id="keyKLP" name="keyKLP" required>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="ketUSER" class="form-label">Keterangan</label>
+            <input type="text" class="form-control" id="ketUSER" name="ketUSER" maxlength="200" placeholder="Keterangan">
+          </div>
+          <div class="mb-3">
+            <label for="statusUSER" class="form-label">Status <span class="text-danger">*</span></label>
+            <select class="form-select" id="statusUSER" name="statusUSER" required>
+              <option value="1">Aktif</option>
+              <option value="0">Non-Aktif</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" id="saveUserBtn">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let isDeletingUser = false;
+
+  // Fungsi untuk mengonfirmasi hapus
+  function confirmDelete(userId) {
+    if (!userId) {
+      Swal.fire('Gagal', 'User ID tidak ditemukan', 'error');
+      return;
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    
+    confirmBtn.onclick = function() {
+      if (isDeletingUser) return;
+      isDeletingUser = true;
+      confirmBtn.disabled = true;
+
+      // Kirim request hapus via AJAX
+      fetch(window.location.origin + '/user/delete/' + userId, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(async (res) => {
+          const contentType = res.headers.get('content-type') || '';
+          if (!contentType.includes('application/json')) {
+            throw new Error('Respons server bukan JSON');
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (data.success) {
+            // Reload DataTable
+            $('#userTable').DataTable().ajax.reload();
+            // Tutup modal
+            modal.hide();
+            // Tampilkan notifikasi sukses
+            Swal.fire('Berhasil', data.message, 'success');
+          } else {
+            Swal.fire('Gagal', data.message || 'User tidak ditemukan', 'error');
+          }
+        })
+        .catch(error => {
+          Swal.fire('Gagal', 'Terjadi kesalahan saat menghapus user', 'error');
+        })
+        .finally(() => {
+          isDeletingUser = false;
+          confirmBtn.disabled = false;
+        });
+    };
+    
+    modal.show();
+  }
+  
+  // Buka modal tambah user
+  function openAddUser() {
+    $('#userModalTitle').text('Tambah User');
+    $('#formUser')[0].reset();
+    $('#userID_old').val('');
+    $('#userID').prop('readonly', false);
+    $('#PWD').prop('required', true);
+    $('#PWD2').prop('required', true);
+    $('#statusUSER').val('1'); // Set default to aktif
+    // Reset Select2
+    $('#keyKLP').val(null).trigger('change');
+    $('#userModal').modal('show');
+  }
+  
+  // Buka modal edit user
+  function openEditUser(userId) {
+    if (!userId) {
+      Swal.fire('Gagal', 'User ID tidak ditemukan', 'error');
+      return;
+    }
+    
+    $.get(window.location.origin + '/user/detail/' + userId, function(data) {
+      if(data.success) {
+        $('#userModalTitle').text('Edit User');
+        $('#userID_old').val(data.data.userID);
+        $('#userID').val(data.data.userID).prop('readonly', true);
+        $('#nmUSER').val(data.data.nmUSER);
+        $('#ketUSER').val(data.data.ketUSER);
+        $('#statusUSER').val(data.data.statusUSER || data.data.status || 1);
+        // Clear password fields for security
+        $('#PWD').val('');
+        $('#PWD2').val('');
+        $('#PWD').prop('required', false);
+        $('#PWD2').prop('required', false);
+        
+        // Reset Select2
+        $('#keyKLP').val(null).trigger('change');
+        
+        // Set Select2 values
+        if (data.data.keyKLP) {
+          var optionKLP = new Option(data.data.nmKLP, data.data.keyKLP, true, true);
+          $('#keyKLP').append(optionKLP).trigger('change');
+        }
+        
+        $('#userModal').modal('show');
+      } else {
+        Swal.fire('Gagal', data.message || 'User tidak ditemukan', 'error');
+      }
+    }).fail(function(xhr) {
+      Swal.fire('Gagal', 'Terjadi kesalahan saat mengambil data user', 'error');
+    });
+  }
+  
+  // Submit form tambah/edit user
+  $('#saveUserBtn').on('click', function() {
+    // Validate required fields
+    const userID = $('#userID').val().trim();
+    const nmUSER = $('#nmUSER').val().trim();
+    const keyKLP = $('#keyKLP').val();
+    const PWD = $('#PWD').val();
+    const PWD2 = $('#PWD2').val();
+    
+    if (!userID) {
+      Swal.fire('Gagal', 'Username harus diisi!', 'error');
+      $('#userID').focus();
+      return;
+    }
+    
+    if (!nmUSER) {
+      Swal.fire('Gagal', 'Nama Lengkap harus diisi!', 'error');
+      $('#nmUSER').focus();
+      return;
+    }
+    
+    if (!keyKLP) {
+      Swal.fire('Gagal', 'Kelompok harus dipilih!', 'error');
+      $('#keyKLP').focus();
+      return;
+    }
+    
+    // Check password only if required (for add mode)
+    if ($('#PWD').prop('required')) {
+      if (!PWD) {
+        Swal.fire('Gagal', 'Password harus diisi!', 'error');
+        $('#PWD').focus();
+        return;
+      }
+      if (PWD.length < 6) {
+        Swal.fire('Gagal', 'Password minimal 6 karakter!', 'error');
+        $('#PWD').focus();
+        return;
+      }
+      if (PWD !== PWD2) {
+        Swal.fire('Gagal', 'Password dan Ulangi Password tidak cocok!', 'error');
+        $('#PWD2').focus();
+        return;
+      }
+    } else {
+      // For edit mode, check password only if provided
+      if (PWD && PWD.length < 6) {
+        Swal.fire('Gagal', 'Password minimal 6 karakter!', 'error');
+        $('#PWD').focus();
+        return;
+      }
+      if (PWD && PWD !== PWD2) {
+        Swal.fire('Gagal', 'Password dan Ulangi Password tidak cocok!', 'error');
+        $('#PWD2').focus();
+        return;
+      }
+    }
+    
+    const userId = $('#userID_old').val();
+    const url = userId ? '/user/update' : '/user/insert';
+    
+    $.ajax({
+      url: window.location.origin + url,
+      method: 'POST',
+      data: $('#formUser').serialize(),
+      success: function(res) {
+        if(res.success) {
+          $('#userModal').modal('hide');
+          $('#userTable').DataTable().ajax.reload();
+          Swal.fire('Berhasil', res.message || 'Data berhasil disimpan', 'success');
+        } else {
+          Swal.fire('Gagal', res.message || 'Terjadi kesalahan saat menyimpan data', 'error');
+        }
+      },
+      error: function(xhr) {
+        Swal.fire('Gagal', 'Terjadi kesalahan saat menyimpan data', 'error');
+      }
+    });
+  });
+  
+  $(document).ready(function() {
+    // Hancurkan DataTable jika sudah ada
+    if ($.fn.DataTable.isDataTable('#userTable')) {
+      $('#userTable').DataTable().destroy();
+    }
+
+    // Clear previous custom filters to avoid duplication
+    $.fn.dataTable.ext.search = [];
+
+    // Custom filter for status
+    $.fn.dataTable.ext.search.push(
+      function(settings, data, dataIndex) {
+        var statusFilter = $('#statusFilter').val();
+        if (statusFilter === '') {
+          return true;
+        }
+        
+        // data[5] adalah kolom index 5 (kolom Status)
+        var table = $('#userTable').DataTable();
+        var rowData = table.row(dataIndex).data();
+        var status = rowData.statusUSER !== undefined ? rowData.statusUSER : 1;
+        
+        return status == statusFilter;
+      }
+    );
+
+    var table = $('#userTable').DataTable({
+      ajax: {
+        url: window.location.origin + '/user/data',
+        dataSrc: function(json) {
+          return json.data;
+        },
+        error: function(xhr, error, thrown) {
+          console.error('Error memuat data:', error, xhr);
+          alert('Error memuat data: ' + error);
+        }
+      },
+      columns: [
+        { data: null, render: (data, type, row, meta) => meta.row + 1 },
+        { data: 'userID' },
+        { data: 'nmUSER', defaultContent: '-' },
+        { data: 'nmKLP' },
+        { data: 'ketUSER' },
+        { 
+          data: 'statusUSER',
+          defaultContent: '1',
+          render: (data, type, row) => {
+            const status = data !== undefined && data !== null ? data : 1; // Default aktif jika tidak ada data
+            const statusText = status == 1 ? 'Aktif' : 'Non-Aktif';
+            const statusClass = status == 1 ? 'bg-label-success' : 'bg-label-secondary';
+            return `<span class="badge ${statusClass}">${statusText}</span>`;
+          }
+        },
+        { data: null, render: function(data, type, row) {
+            return `
+              <div class="d-flex gap-1">
+                <button class="btn btn-sm btn-warning btn-edit" data-userid="${row.userID}" title="Edit" data-bs-toggle="tooltip" data-bs-placement="top">
+                  <i class="bx bx-edit-alt"></i>
+                </button>
+                <button class="btn btn-sm btn-danger btn-delete" data-userid="${row.userID}" title="Hapus" data-bs-toggle="tooltip" data-bs-placement="top">
+                  <i class="bx bx-trash"></i>
+                </button>
+              </div>
+            `;
+          }
+        }
+      ],
+      columnDefs: [{ targets: -1, width: '1%', className: 'text-center action-cell no-wrap', orderable: false }],
+      pageLength: 10,
+      lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+      order: [[1, 'asc']], // Sort by username by default
+      responsive: true,
+      language: {
+        "sProcessing": "Sedang memproses...",
+        "sLengthMenu": "Tampilkan _MENU_ entri",
+        "sZeroRecords": "Tidak ditemukan data yang sesuai",
+        "sInfo": "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+        "sInfoEmpty": "Menampilkan 0 sampai 0 dari 0 entri",
+        "sInfoFiltered": "(disaring dari _MAX_ entri keseluruhan)",
+        "sInfoPostFix": "",
+        "sSearch": "Cari:",
+        "sUrl": "",
+        "oPaginate": {
+          "sFirst": "Pertama",
+          "sPrevious": "Sebelumnya",
+          "sNext": "Selanjutnya",
+          "sLast": "Terakhir"
+        }
+      }
+    });
+
+    // Filter
+    $('#searchInput').on('keyup', function() {
+      table.search(this.value).draw();
+    });
+
+    // Isi pilihan filter kelompok dari tabel KELOMPOK
+    $.get(window.location.origin + '/kelompok/comboData', { limit: 100 }, function(res) {
+      (res.results || []).forEach(function(item) {
+        $('#roleFilter').append(new Option(item.text, item.text));
+      });
+    });
+
+    $('#roleFilter').on('change', function() {
+      table.column(3).search(this.value).draw();
+    });
+
+    $('#statusFilter').on('change', function() {
+      table.draw();
+    });
+
+    // Initialize tooltips
+    $('[data-bs-toggle="tooltip"]').tooltip();
+
+    // Re-initialize tooltips on table draw (for dynamic content)
+    table.on('draw', function() {
+      // Destroy existing tooltips first
+      $('[data-bs-toggle="tooltip"]').tooltip('dispose');
+      // Re-initialize tooltips
+      $('[data-bs-toggle="tooltip"]').tooltip();
+    });
+
+    // Inisialisasi Select2 untuk modal
+    $('#keyKLP').select2({
+      dropdownParent: $('#userModal'),
+      ajax: {
+        url: window.location.origin + '/kelompok/comboData',
+        dataType: 'json',
+        data: function (params) {
+          return { search: params.term || '' };
+        },
+        delay: 250,
+        processResults: function(data) { return data; }
+      },
+      placeholder: 'Pilih Kelompok',
+      allowClear: true
+    });
+
+    // Event delegation for edit and delete buttons
+    $('#userTable').on('click', '.btn-edit', function() {
+      const userId = $(this).data('userid');
+      openEditUser(userId);
+    });
+
+    $('#userTable').on('click', '.btn-delete', function() {
+      const userId = $(this).data('userid');
+      confirmDelete(userId);
+    });
+
+    // Reset form when modal is closed
+    $('#userModal').on('hidden.bs.modal', function() {
+      $('#formUser')[0].reset();
+      $('#userID').prop('readonly', false);
+      $('#PWD').prop('required', true);
+      $('#PWD2').prop('required', true);
+      $('#statusUSER').val('1'); // Set default to aktif
+      $('#keyKLP').val(null).trigger('change');
+    });
+  });
+</script>

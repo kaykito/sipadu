@@ -1,0 +1,89 @@
+-- Skema inti boilerplate: kelompok (role), user, menu (FITUR), hak akses (OTORISASI),
+-- dan perangkat login (USER_DEVICES, dipakai single-session di auth.check_session_valid).
+-- Tabel session (Sessions) dibuat otomatis oleh connect-session-sequelize saat aplikasi start.
+
+IF OBJECT_ID(N'dbo.KELOMPOK', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[KELOMPOK] (
+    [keyKLP] BIGINT IDENTITY(1,1) NOT NULL,
+    [nmKLP] NVARCHAR(50) NOT NULL,
+    [ketKLP] NVARCHAR(255) NULL,
+    CONSTRAINT [PK_KELOMPOK] PRIMARY KEY CLUSTERED ([keyKLP] ASC)
+    );
+END
+GO
+
+IF OBJECT_ID(N'dbo.APPUSER', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[APPUSER] (
+    [keyUSER] BIGINT IDENTITY(1,1) NOT NULL,
+    [userID] NVARCHAR(50) NOT NULL,
+    [PWD] NVARCHAR(255) NOT NULL,
+    [keyKLP] BIGINT NOT NULL,
+    [nmUSER] NVARCHAR(100) NULL,
+    [ketUSER] NVARCHAR(255) NULL,
+    [avatar] NVARCHAR(255) NULL,
+    [statusUSER] INT DEFAULT ((1)) NOT NULL,
+    CONSTRAINT [PK_APPUSER] PRIMARY KEY CLUSTERED ([keyUSER] ASC),
+    CONSTRAINT [UQ_APPUSER_userID] UNIQUE NONCLUSTERED ([userID] ASC)
+    );
+END
+GO
+
+IF OBJECT_ID(N'dbo.FITUR', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[FITUR] (
+    [keyFITUR] BIGINT IDENTITY(1,1) NOT NULL,
+    [kdFITUR] NVARCHAR(20) NOT NULL,
+    [nmFITUR] NVARCHAR(100) NOT NULL,
+    [parentKeyFITUR] BIGINT NULL,
+    [url] VARCHAR(255) NULL,
+    CONSTRAINT [PK_FITUR] PRIMARY KEY CLUSTERED ([keyFITUR] ASC),
+    CONSTRAINT [UQ_FITUR_kdFITUR] UNIQUE NONCLUSTERED ([kdFITUR] ASC)
+    );
+END
+GO
+
+IF OBJECT_ID(N'dbo.OTORISASI', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[OTORISASI] (
+    [keyOTO] BIGINT IDENTITY(1,1) NOT NULL,
+    [keyFITUR] BIGINT NOT NULL,
+    [keyKLP] BIGINT NOT NULL,
+    [aksi] NVARCHAR(20) NOT NULL,
+    CONSTRAINT [PK_OTORISASI] PRIMARY KEY CLUSTERED ([keyOTO] ASC)
+    );
+END
+GO
+
+IF OBJECT_ID(N'dbo.USER_DEVICES', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[USER_DEVICES] (
+    [keyDEVICE] INT IDENTITY(1,1) NOT NULL,
+    [userID] NVARCHAR(50) NOT NULL,
+    [deviceName] NVARCHAR(255) NOT NULL,
+    [deviceOS] NVARCHAR(100) NOT NULL,
+    [deviceType] NVARCHAR(50) NOT NULL,
+    [browser] NVARCHAR(100) NOT NULL,
+    [ipAddress] NVARCHAR(45) NULL,
+    [location] NVARCHAR(255) NULL,
+    [sessionID] NVARCHAR(255) NULL,
+    [isCurrent] BIT DEFAULT ((0)) NULL,
+    [isActive] BIT DEFAULT ((1)) NULL,
+    [lastAccess] DATETIME DEFAULT (getdate()) NULL,
+    [createdAt] DATETIME DEFAULT (getdate()) NULL,
+    CONSTRAINT [PK_USER_DEVICES] PRIMARY KEY CLUSTERED ([keyDEVICE] ASC)
+    );
+END
+GO
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes
+    WHERE object_id = OBJECT_ID(N'dbo.USER_DEVICES')
+    AND name = N'idx_USER_DEVICES_sessionID'
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [idx_USER_DEVICES_sessionID]
+    ON [dbo].[USER_DEVICES] ([sessionID] ASC);
+END
+GO

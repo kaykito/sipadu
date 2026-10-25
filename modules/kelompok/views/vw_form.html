@@ -1,0 +1,74 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+  <form id="form-kelompok" autocomplete="off">
+    <input type="hidden" id="mode" name="mode" value="<%= mode %>">
+    <% if (mode === 'edit') { %>
+      <input type="hidden" id="keyKLP" name="keyKLP" value="<%= kelompok.keyKLP %>">
+    <% } %>
+    
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0"><%= title %></h5>
+        <small class="text-muted"><%= subtitle %></small>
+      </div>
+      
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="nmKLP" class="form-label">Nama Kelompok <span class="text-danger">*</span></label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="nmKLP" 
+            name="nmKLP" 
+            value="<%= kelompok ? kelompok.nmKLP : '' %>" 
+            required 
+            maxlength="100" 
+            placeholder="Nama Kelompok"
+          >
+        </div>
+        
+        <div class="mb-3">
+          <label for="ketKLP" class="form-label">Keterangan</label>
+          <textarea 
+            class="form-control" 
+            id="ketKLP" 
+            name="ketKLP" 
+            maxlength="200" 
+            placeholder="Keterangan"
+            rows="3"
+          ><%= kelompok ? kelompok.ketKLP : '' %></textarea>
+        </div>
+      </div>
+      
+      <div class="card-footer text-end">
+        <button type="submit" class="btn btn-primary"><%= mode === 'edit' ? 'Update' : 'Simpan' %></button>
+        <button type="reset" class="btn btn-secondary">Reset</button>
+        <a href="/kelompok/index" class="btn btn-outline-dark">Kembali</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+document.getElementById('form-kelompok').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  // Tentukan endpoint berdasarkan mode
+  var mode = document.getElementById('mode').value;
+  var endpoint = (mode === 'edit') ? '/kelompok/update' : '/kelompok/insert';
+  
+  var formData = new FormData(document.getElementById('form-kelompok'));
+  
+  fetch(endpoint, {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      window.location.href = '/kelompok/index';
+    } else {
+      alert(data.message);
+    }
+  });
+});
+</script>
