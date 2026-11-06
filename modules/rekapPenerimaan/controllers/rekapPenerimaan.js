@@ -438,7 +438,10 @@ exports.updateKirimUlang = async function (req, res) {
                 WHERE rs.nomorREKAP = @noTBP
                 GROUP BY LTRIM(RTRIM(d.nmRekening));
 
-                DECLARE @tanpaAkun NVARCHAR(MAX) = (SELECT STRING_AGG(nmRekening, ', ') FROM @rinci WHERE mtgKey IS NULL);
+                -- STUFF + FOR XML PATH pengganti STRING_AGG (SQL Server 2017+) agar jalan di SQL Server 2014
+                DECLARE @tanpaAkun NVARCHAR(MAX) = STUFF((
+                    SELECT N', ' + nmRekening FROM @rinci WHERE mtgKey IS NULL
+                    FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, N'');
                 IF @tanpaAkun IS NOT NULL
                 BEGIN
                     DECLARE @pesan NVARCHAR(2048) = N'Rekening tidak ditemukan di MATANGD SIPKD: ' + @tanpaAkun;

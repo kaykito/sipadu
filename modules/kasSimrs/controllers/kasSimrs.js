@@ -153,6 +153,19 @@ function kelompokkanKasBlud(rows) {
     return { headers: Object.values(headers), details };
 }
 
+// Ubah array objek menjadi XML <rows><r a="..."/></rows> untuk dibaca dengan .nodes() di SQL
+// (pengganti OPENJSON yang baru ada di SQL Server 2016; XML sudah didukung SQL Server 2014).
+// Angka ditulis 2 desimal (hindari notasi eksponen float), null dihilangkan agar terbaca NULL.
+function keXml(rows, fields) {
+    const esc = (v) => (typeof v === 'number' ? v.toFixed(2) : String(v))
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g, '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+        .replace(/\t/g, '&#9;').replace(/\n/g, '&#10;').replace(/\r/g, '&#13;');
+    return '<rows>' + rows.map((r) => '<r' + fields
+        .filter((f) => r[f] !== null && r[f] !== undefined)
+        .map((f) => ' ' + f + '="' + esc(r[f]) + '"').join('') + '/>').join('') + '</rows>';
+}
+
 // Tarik data kas dari API SIM RS (KasBlud) untuk rentang tanggal, lalu simpan ke KAS_SIMRS + KAS_SIMRS_DETAIL.
 // Bukti baru ditambahkan, bukti lama diperbarui; bukti yang sudah masuk rekap tidak diubah.
 exports.updateSinkronisasi = async function (req, res) {
@@ -192,23 +205,24 @@ exports.updateSinkronisasi = async function (req, res) {
         let hasil = { baru: 0, diperbarui: 0, dilewati: 0 };
         if (headers.length) {
             const result = await pool.request()
-                .input('headers', db.sql.NVarChar(db.sql.MAX), JSON.stringify(headers))
-                .input('details', db.sql.NVarChar(db.sql.MAX), JSON.stringify(details))
+                .input('headers', db.sql.NVarChar(db.sql.MAX), keXml(headers, ['noBukti', 'tglKAS', 'penyetor', 'jenis', 'total', 'bank', 'noRek']))
+                .input('details', db.sql.NVarChar(db.sql.MAX), keXml(details, ['kasBludId', 'noBukti', 'kdREK', 'nmRekening', 'uraian', 'nilai']))
                 .query(`
                     SET XACT_ABORT ON;
+                    DECLARE @hx XML = @headers, @dx XML = @details;
+
                     DECLARE @h TABLE (noBukti NVARCHAR(30) PRIMARY KEY, tglKAS DATETIME, penyetor NVARCHAR(150), jenis VARCHAR(3), total DECIMAL(18,2), bank NVARCHAR(100), noRek NVARCHAR(50));
                     INSERT INTO @h
-                    SELECT noBukti, CONVERT(DATETIME, tglKAS, 120), penyetor, jenis, total, bank, noRek
-                    FROM OPENJSON(@headers) WITH (
-                        noBukti NVARCHAR(30), tglKAS VARCHAR(19), penyetor NVARCHAR(150), jenis VARCHAR(3),
-                        total DECIMAL(18,2), bank NVARCHAR(100), noRek NVARCHAR(50));
+                    SELECT x.value('@noBukti', 'NVARCHAR(30)'), CONVERT(DATETIME, x.value('@tglKAS', 'VARCHAR(19)'), 120),
+                           x.value('@penyetor', 'NVARCHAR(150)'), x.value('@jenis', 'VARCHAR(3)'), x.value('@total', 'DECIMAL(18,2)'),
+                           x.value('@bank', 'NVARCHAR(100)'), x.value('@noRek', 'NVARCHAR(50)')
+                    FROM @hx.nodes('/rows/r') t(x);
 
                     DECLARE @d TABLE (kasBludId NVARCHAR(30) PRIMARY KEY, noBukti NVARCHAR(30), kdREK NVARCHAR(30), nmRekening NVARCHAR(100), uraian NVARCHAR(200), nilai DECIMAL(18,2));
                     INSERT INTO @d
-                    SELECT kasBludId, noBukti, kdREK, nmRekening, uraian, nilai
-                    FROM OPENJSON(@details) WITH (
-                        kasBludId NVARCHAR(30), noBukti NVARCHAR(30), kdREK NVARCHAR(30), nmRekening NVARCHAR(100),
-                        uraian NVARCHAR(200), nilai DECIMAL(18,2));
+                    SELECT x.value('@kasBludId', 'NVARCHAR(30)'), x.value('@noBukti', 'NVARCHAR(30)'), x.value('@kdREK', 'NVARCHAR(30)'),
+                           x.value('@nmRekening', 'NVARCHAR(100)'), x.value('@uraian', 'NVARCHAR(200)'), x.value('@nilai', 'DECIMAL(18,2)')
+                    FROM @dx.nodes('/rows/r') t(x);
 
                     DECLARE @dilewati INT = (SELECT COUNT(*) FROM @h h JOIN KAS_SIMRS k ON k.noBukti = h.noBukti WHERE EXISTS (SELECT 1 FROM Rekap_SIMRS rs WHERE rs.nomorBUKTI = k.noBukti));
                     DECLARE @diperbarui INT, @baru INT;

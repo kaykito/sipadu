@@ -44,7 +44,12 @@ GO
 --   Jumat        14.01 Kamis        s.d. 13.00 Jumat
 --   Minggu       13.01 Jumat        s.d. 23.59 Minggu (mencakup Sabtu)
 --   Sabtu        tidak ada rekap tersendiri -> tidak menyisipkan apa pun
-CREATE OR ALTER PROCEDURE dbo.sp_RekapSIMRS_Generate
+-- Kompatibel SQL Server 2014: tanpa CREATE OR ALTER (2016 SP1+) / OPENJSON (2016+); buat stub lalu ALTER.
+IF OBJECT_ID(N'dbo.sp_RekapSIMRS_Generate', N'P') IS NULL
+    EXEC (N'CREATE PROCEDURE dbo.sp_RekapSIMRS_Generate AS RETURN 0;');
+GO
+
+ALTER PROCEDURE dbo.sp_RekapSIMRS_Generate
     @noREKAP NVARCHAR(20)
 AS
 BEGIN
@@ -86,7 +91,12 @@ GO
 
 -- Tambah bukti manual ke rekap. @daftarBukti = JSON array nomor bukti, mis. ["DX0228042A","DX0228044A"].
 -- Bukti yang jenisnya beda atau sudah masuk rekap lain dilewati.
-CREATE OR ALTER PROCEDURE dbo.sp_RekapSIMRS_TambahBukti
+-- Array dipecah manual (tanpa OPENJSON); nilai berisi koma/kurung/kutip memang tidak akan cocok dengan noBukti mana pun.
+IF OBJECT_ID(N'dbo.sp_RekapSIMRS_TambahBukti', N'P') IS NULL
+    EXEC (N'CREATE PROCEDURE dbo.sp_RekapSIMRS_TambahBukti AS RETURN 0;');
+GO
+
+ALTER PROCEDURE dbo.sp_RekapSIMRS_TambahBukti
     @noREKAP NVARCHAR(20),
     @daftarBukti NVARCHAR(MAX)
 AS
@@ -101,10 +111,23 @@ BEGIN
     IF @statusApi = 'success'
         THROW 50003, N'Rekap yang sudah terkirim tidak dapat diubah', 1;
 
+    DECLARE @bukti TABLE (noBukti NVARCHAR(30));
+    DECLARE @sisa NVARCHAR(MAX) = REPLACE(REPLACE(ISNULL(@daftarBukti, N''), N'[', N''), N']', N'');
+    DECLARE @pos INT, @item NVARCHAR(MAX);
+    WHILE LEN(@sisa) > 0
+    BEGIN
+        SET @pos = CHARINDEX(N',', @sisa);
+        IF @pos = 0 SET @pos = LEN(@sisa) + 1;
+        SET @item = LTRIM(RTRIM(REPLACE(LEFT(@sisa, @pos - 1), N'"', N'')));
+        SET @sisa = SUBSTRING(@sisa, @pos + 1, LEN(@sisa));
+        IF LEN(@item) BETWEEN 1 AND 30
+            INSERT INTO @bukti (noBukti) VALUES (@item);
+    END
+
     INSERT INTO dbo.Rekap_SIMRS (nomorREKAP, nomorBUKTI)
     SELECT DISTINCT @noREKAP, k.noBukti
-    FROM OPENJSON(@daftarBukti) j
-    JOIN dbo.KAS_SIMRS k ON k.noBukti = j.[value]
+    FROM @bukti j
+    JOIN dbo.KAS_SIMRS k ON k.noBukti = j.noBukti
     WHERE k.jenis = @jenis
       AND NOT EXISTS (SELECT 1 FROM dbo.Rekap_SIMRS rs WHERE rs.nomorBUKTI = k.noBukti);
 
@@ -112,7 +135,11 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_RekapSIMRS_HapusBukti
+IF OBJECT_ID(N'dbo.sp_RekapSIMRS_HapusBukti', N'P') IS NULL
+    EXEC (N'CREATE PROCEDURE dbo.sp_RekapSIMRS_HapusBukti AS RETURN 0;');
+GO
+
+ALTER PROCEDURE dbo.sp_RekapSIMRS_HapusBukti
     @noREKAP NVARCHAR(20),
     @noBukti NVARCHAR(30)
 AS
