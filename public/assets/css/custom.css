@@ -16,6 +16,20 @@ table {
     font-size: 0.875rem;
 }
 
+/* Lebar kolom tabel (dipasang di <th>, disalin ke <td> untuk DataTables).
+   col-teks tidak diberi lebar: mengambil sisa ruang dan boleh turun baris. */
+.table .col-no     { width: 50px; text-align: center; }
+.table .col-cek    { width: 40px; text-align: center; }
+.table .col-aksi   { width: 1%; white-space: nowrap; text-align: center; }
+.table .col-tgl    { width: 110px; white-space: nowrap; }
+.table .col-tgljam { width: 150px; white-space: nowrap; }
+.table .col-kode   { width: 170px; white-space: nowrap; }
+.table .col-status { width: 110px; white-space: nowrap; }
+.table .col-angka  { width: 110px; white-space: nowrap; text-align: center; }
+.table .col-nominal { width: 160px; white-space: nowrap; text-align: right; }
+.table .col-sedang { width: 200px; white-space: normal; }
+.table .col-teks   { min-width: 220px; white-space: normal; }
+
 /* Highlight row */
 .highlight-row {
     background-color: #e3f2fd !important;
@@ -98,6 +112,18 @@ table .btn.btn-sm.disabled {
 
 .sidebar-logo {
     object-fit: contain;
+}
+
+.sidebar-brand-text {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    line-height: 1;
+    color: var(--bs-primary, #696cff);
+}
+
+.app-brand .sidebar-brand-text.app-brand-img-collapsed {
+    display: none !important;
 }
 
 .app-brand .sidebar-logo.app-brand-img {

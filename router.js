@@ -96,6 +96,19 @@ async function dispatchDynamicAction(req, res, next, defaultAction = null) {
     }
 }
 
+// Teks identitas di halaman login; bisa diganti lewat .env
+function getLoginBranding() {
+    return {
+        instansi1: process.env.LOGIN_INSTANSI_1 || 'PEMERINTAH PROVINSI BALI',
+        instansi2: process.env.LOGIN_INSTANSI_2 || 'RUMAH SAKIT MATA BALI MANDARA',
+        judul: process.env.LOGIN_JUDUL || 'SIPADU',
+        judulAksen: process.env.LOGIN_JUDUL_AKSEN || 'BLUD',
+        tagline: process.env.LOGIN_TAGLINE || 'Sistem Integrasi Pendapatan Pasien Terpadu ke BLUD',
+        pengembang: process.env.LOGIN_PENGEMBANG || 'PT Quantum Sistem Intermatika',
+        kontakAdmin: process.env.LOGIN_KONTAK_ADMIN || '',
+    };
+}
+
 function renderLogin(req, res) {
     const flashInfo = req.flash ? req.flash('info') : [];
     const flashSuccess = req.flash ? req.flash('success') : [];
@@ -105,6 +118,7 @@ function renderLogin(req, res) {
         error_msg: flashInfo[0] || req.query.error_msg || '',
         success_msg: flashSuccess[0] || '',
         turnstileSiteKey: getTurnstileSiteKey(),
+        branding: getLoginBranding(),
     });
 }
 

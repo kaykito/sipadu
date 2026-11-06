@@ -3,13 +3,19 @@
 	"version": "1.0.0",
 	"private": true,
 	"description": "Boilerplate Express + MSSQL server-rendered: login, single-session, RBAC menu (FITUR/OTORISASI), dynamic module dispatch, generator modul CRUD.",
+	"engines": {
+		"node": ">=24"
+	},
 	"scripts": {
 		"start": "node app.js",
 		"dev": "nodemon app.js",
 		"build": "node scripts/build-check.js",
 		"generate:tables:db": "node scripts/generate-table-migrations-from-db.js",
 		"db:migrate": "node scripts/migrate.js",
-		"db:migrate:baseline": "node scripts/migrate.js --baseline"
+		"db:migrate:baseline": "node scripts/migrate.js --baseline",
+		"db:seed": "node scripts/migrate.js --seed",
+		"db:seed:baseline": "node scripts/migrate.js --seed --baseline",
+		"db:setup": "npm run db:migrate && npm run db:seed"
 	},
 	"dependencies": {
 		"async": "^2.6.1",

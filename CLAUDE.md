@@ -15,12 +15,15 @@ npm start                     # production
 npm run build                 # node --check over all server JS (no bundler/transpiler)
 npm run db:migrate            # apply pending migrations/*.sql (tracked in SchemaMigrations)
 npm run db:migrate:baseline   # mark current migrations as applied without running them
+npm run db:seed               # apply pending seeders/*.sql (tracked in SchemaSeeders)
+npm run db:seed:baseline      # mark current seeders as applied without running them
+npm run db:setup              # db:migrate then db:seed
 npm run generate:tables:db    # dump CREATE TABLE SQL from the live DB into migrations/tables/
 ```
 
-There is no test suite or lint config. Always run `npm run build` after editing server JS.
+Requires Node.js 24 (`.nvmrc`, `engines` in package.json); after switching Node versions run `npm rebuild` (bcrypt is native). There is no test suite or lint config. Always run `npm run build` after editing server JS.
 
-Setup: copy `.env.example` to `.env`, fill DB/session values, run `npm run db:migrate`. Default login after seeding: `admin` / `admin123`.
+Setup: copy `.env.example` to `.env`, fill DB/session values, run `npm run db:setup`. Default login after seeding: `admin` / `admin123`.
 
 ## Architecture
 
@@ -57,7 +60,7 @@ Controllers call `database.js` directly (no ORM for business tables). Convention
 
 Core tables: `KELOMPOK` (groups), `APPUSER`, `FITUR` (menu tree via `parentKeyFITUR`, ordered by `kdFITUR`, `url` stored without leading slash), `OTORISASI` (keyFITUR × keyKLP × aksi), `USER_DEVICES`, plus `CONTOH` for the example module.
 
-`scripts/migrate.js` applies `migrations/*.sql` (top level only, not `migrations/tables/`) in filename order, splitting batches on standalone `GO` lines. Name new files with a date prefix so they sort after existing ones.
+`scripts/migrate.js` applies `migrations/*.sql` (schema; top level only, not `migrations/tables/`) tracked in `SchemaMigrations`, or with `--seed` applies `seeders/*.sql` (data: core seed, FITUR/OTORISASI menu rows; integration data comes only from the SIM RS API, no sample seeder) tracked in `SchemaSeeders`. Files run in filename order, batches split on standalone `GO` lines. Seeders run after migrations and must be idempotent (`IF NOT EXISTS`). Name new files with a date prefix so they sort after existing ones.
 
 ### Auth & sessions (`auth.js`, `modules/login`)
 

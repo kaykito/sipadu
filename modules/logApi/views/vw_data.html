@@ -1,0 +1,63 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <h5 class="mb-0">System Trace &amp; API Logs</h5>
+      <form class="d-flex flex-wrap gap-2" id="formFilterLog" onsubmit="return false">
+        <input type="date" class="form-control form-control-sm w-auto" id="filterTanggalLog" name="tanggal">
+        <select class="form-select form-select-sm w-auto" id="filterStatusLog" name="status">
+          <option value="">Semua Status</option>
+          <option value="success">Success</option>
+          <option value="failed">Failed</option>
+        </select>
+        <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bx bx-filter-alt me-1"></i> Filter Logs</button>
+      </form>
+    </div>
+    <div class="card-body">
+      <div class="accordion" id="logAccordion"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    function escapeHtml(value) {
+      return $('<div>').text(value == null ? '' : value).html();
+    }
+    function waktu(v) { return v.replace('T', ' '); }
+
+    function render(rows) {
+      if (!rows.length) {
+        $('#logAccordion').html('<div class="text-center text-muted py-4">Tidak ada log untuk filter ini</div>');
+        return;
+      }
+      $('#logAccordion').html(rows.map(function (l, i) {
+        var ok = l.httpCode < 400;
+        var id = 'logItem' + l.id;
+        return '<div class="accordion-item border mb-2">' +
+          '<h2 class="accordion-header">' +
+            '<button class="accordion-button' + (i === 0 && !ok ? '' : ' collapsed') + ' gap-2" type="button" data-bs-toggle="collapse" data-bs-target="#' + id + '">' +
+              '<span class="badge ' + (ok ? 'bg-label-success' : 'bg-label-danger') + '">HTTP ' + escapeHtml(l.httpCode) + '</span>' +
+              '<code class="text-body">[' + escapeHtml(waktu(l.waktu)) + '] ' + escapeHtml(l.metode) + ' ' + escapeHtml(l.endpoint) + '</code>' +
+              '<small class="ms-auto me-2 text-muted d-none d-md-inline">' + escapeHtml(l.ref) + '</small>' +
+            '</button>' +
+          '</h2>' +
+          '<div id="' + id + '" class="accordion-collapse collapse' + (i === 0 && !ok ? ' show' : '') + '">' +
+            '<div class="accordion-body"><pre class="mb-0 small text-wrap">' + escapeHtml(JSON.stringify(l.body, null, 2)) + '</pre></div>' +
+          '</div>' +
+        '</div>';
+      }).join(''));
+    }
+
+    function load() {
+      $.get('/logApi/data', $('#formFilterLog').serialize())
+        .done(function (res) {
+          if (res.success) render(res.data);
+          else Swal.fire('Gagal', res.message, 'error');
+        })
+        .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); });
+    }
+
+    $('#formFilterLog').off('submit').on('submit', load);
+    load();
+  })();
+</script>

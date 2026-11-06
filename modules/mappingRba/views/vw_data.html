@@ -1,0 +1,119 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <h5 class="mb-0">Daftar Layanan RS</h5>
+      <% if (akses.edit) { %>
+      <button type="button" class="btn btn-primary" id="btnSyncMapping">
+        <i class="bx bx-refresh me-1"></i> Sinkronisasi Mapping
+      </button>
+      <% } %>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive text-nowrap">
+        <table class="table table-sm table-bordered w-100" id="layananTable">
+          <thead>
+            <tr>
+              <th class="col-no">No</th>
+              <th class="col-kode">Kode</th>
+              <th class="col-teks">Nama Rekening</th>
+              <th class="col-aksi">Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detail Uraian Layanan -->
+<div class="modal fade" id="uraianLayananModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title mb-0">Uraian Layanan</h5>
+          <small class="text-muted" id="uraianLayananInfo"></small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered w-100">
+            <thead>
+              <tr><th style="width: 1%">No</th><th>Uraian Layanan</th></tr>
+            </thead>
+            <tbody id="uraianLayananBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    function escapeHtml(value) {
+      return $('<div>').text(value == null ? '' : value).html();
+    }
+
+    var language = {
+      processing: 'Sedang memproses...',
+      lengthMenu: 'Tampilkan _MENU_ entri',
+      zeroRecords: 'Tidak ditemukan data yang sesuai',
+      info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ entri',
+      infoEmpty: 'Menampilkan 0 sampai 0 dari 0 entri',
+      infoFiltered: '(disaring dari _MAX_ entri keseluruhan)',
+      search: 'Cari:',
+      paginate: { first: 'Pertama', previous: 'Sebelumnya', next: 'Selanjutnya', last: 'Terakhir' }
+    };
+
+    function rowNumber(data, type, row, meta) { return meta.settings._iDisplayStart + meta.row + 1; }
+
+    if ($.fn.DataTable.isDataTable('#layananTable')) {
+      $('#layananTable').DataTable().destroy();
+    }
+
+    var layananTable = $('#layananTable').DataTable({
+      serverSide: true,
+      processing: true,
+      ajax: { url: '/mappingRba/dataLayanan' },
+      columns: [
+        { data: null, orderable: false, render: rowNumber },
+        { data: 'kdLayanan', render: function (v) { return '<code>' + escapeHtml(v) + '</code>'; } },
+        { data: 'uraian', render: escapeHtml },
+        {
+          data: null, orderable: false, className: 'text-center text-nowrap', width: '1%',
+          render: function (data, type, row) {
+            return '<button class="btn btn-sm btn-info btn-detail-layanan" data-id="' + escapeHtml(row.kdLayanan) + '" data-uraian="' + escapeHtml(row.uraian) + '" title="Lihat uraian layanan"><i class="bx bx-show"></i></button>';
+          }
+        }
+      ],
+      order: [[1, 'asc']],
+      language: language
+    });
+
+    $('#layananTable').off('click', '.btn-detail-layanan').on('click', '.btn-detail-layanan', function () {
+      var kd = $(this).data('id'), nama = $(this).data('uraian');
+      $.get('/mappingRba/detailLayanan/' + encodeURIComponent(kd), function (res) {
+        if (!res.success) return Swal.fire('Gagal', res.message, 'error');
+        $('#uraianLayananInfo').text(kd + ' - ' + nama + ' · ' + res.data.length + ' uraian');
+        $('#uraianLayananBody').html(res.data.length ? res.data.map(function (u, i) {
+          return '<tr><td>' + (i + 1) + '</td><td>' + escapeHtml(u.uraian) + '</td></tr>';
+        }).join('') : '<tr><td colspan="2" class="text-center text-muted">Belum ada transaksi</td></tr>');
+        $('#uraianLayananModal').modal('show');
+      });
+    });
+
+    $('#btnSyncMapping').off('click').on('click', function () {
+      var btn = $(this).prop('disabled', true);
+      $.post('/mappingRba/updateSinkronisasi')
+        .done(function (res) {
+          Swal.fire(res.success ? 'Berhasil' : 'Gagal', res.message, res.success ? 'success' : 'error');
+          if (res.success) layananTable.ajax.reload(null, false);
+        })
+        .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); })
+        .always(function () { btn.prop('disabled', false); });
+    });
+  })();
+</script>

@@ -1,0 +1,551 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0"><%= subtitle %></h5>
+            <% if (akses.add) { %>
+            <button type="button" class="btn btn-primary" id="btnGenerateRekap">
+                <i class="bx bx-plus me-1"></i>
+                Generate Data Rekap Baru
+            </button>
+            <% } %>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive text-nowrap">
+                <table class="table table-sm table-bordered w-100" id="rekapTable">
+                    <thead>
+                        <tr>
+                            <th class="col-no">No</th>
+                            <th class="col-kode">Nomor</th>
+                            <th class="col-tgl">Tanggal</th>
+                            <th class="col-status">Jenis</th>
+                            <th class="col-teks">Uraian</th>
+                            <th class="col-tgl">Tanggal Setor</th>
+                            <th class="col-status">Status API</th>
+                            <th class="col-aksi">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" id="rekapDetailCard">
+        <div class="card-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <h5 class="mb-0">
+                    Rincian Rekap &mdash;
+                    <code id="rekapDetailId">-</code>
+                </h5>
+                <small class="text-muted" id="rekapDetailInfo">Pilih salah satu rekap untuk melihat rinciannya.</small>
+            </div>
+            <div class="border rounded px-3 py-1 text-md-end">
+                <small class="text-muted">
+                    Total
+                    <span id="rekapTotalInfo"></span>
+                </small>
+                <div class="fw-bold fs-5 rekap-total">-</div>
+            </div>
+        </div>
+        <div class="card-body">
+            <ul class="nav nav-tabs mb-3" role="tablist">
+                <li class="nav-item">
+                    <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabRekapBukti" role="tab">Rincian per Nomor Bukti SIM RS</button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#tabRekapRekening" role="tab">Rekap Rekening BLUD</button>
+                </li>
+            </ul>
+            <div class="tab-content p-0">
+                <div class="tab-pane fade show active" id="tabRekapBukti" role="tabpanel">
+                    <% if (akses.edit) { %>
+                    <div class="mb-2">
+                        <button type="button" class="btn btn-primary btn-sm d-none" id="btnTambahBukti">
+                            <i class="bx bx-plus me-1"></i>
+                            Tambah Nomor Bukti Baru
+                        </button>
+                    </div>
+                    <% } %>
+                    <div class="table-responsive text-nowrap">
+                        <table class="table table-md table-bordered w-100" id="rekapBuktiTable">
+                            <thead>
+                                <tr>
+                                    <th class="col-no">No</th>
+                                    <th class="col-tgljam">Tanggal</th>
+                                    <th class="col-kode">No. Bukti</th>
+                                    <th class="col-teks">Penyetor</th>
+                                    <th class="col-nominal text-end">Total</th>
+                                    <th class="col-aksi text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rekapBuktiBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="tabRekapRekening" role="tabpanel">
+                    <div class="table-responsive text-nowrap">
+                        <table class="table table-md table-bordered w-100" id="rekapRekeningTable">
+                            <thead>
+                                <tr>
+                                    <th class="col-no">No</th>
+                                    <th class="col-kode">Kode Rekening</th>
+                                    <th class="col-teks">Rekening</th>
+                                    <th class="col-nominal text-end">Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Generate / Edit Rekap -->
+<div class="modal fade" id="rekapModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rekapModalTitle">Generate Data Rekap Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <form id="formRekap" onsubmit="return false;">
+                <div class="modal-body">
+                    <input type="hidden" id="rekapMode" value="insert" />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="noRekap" class="form-label">Nomor Rekap</label>
+                            <input type="text" class="form-control" id="noRekap" name="noRekap" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="tanggalRekap" class="form-label">
+                                Tanggal Rekap
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" class="form-control" id="tanggalRekap" name="tanggal" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label d-block">
+                                Jenis
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="jenis" id="jenisTBP" value="TBP" checked />
+                                <label class="form-check-label" for="jenisTBP">TBP</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="jenis" id="jenisSTS" value="STS" />
+                                <label class="form-check-label" for="jenisSTS">STS</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label for="uraianRekap" class="form-label">
+                                Uraian Rekap
+                                <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="uraianRekap" name="uraian" rows="2" maxlength="255" required></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="tglSetor" class="form-label">
+                                Tanggal Setor
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" class="form-control" id="tglSetor" name="tglSetor" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="bankRekap" class="form-label">Bank Tujuan</label>
+                            <select class="form-select" id="bankRekap" name="bank">
+                                <option value="<%= bank.bank %>"><%= bank.bank %></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="noRekBlud" class="form-label">No. Rekening BLUD</label>
+                            <input type="text" class="form-control" id="noRekBlud" name="noRek" value="<%= bank.noRek %>" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="nmRekBlud" class="form-label">Nama Rekening</label>
+                            <input type="text" class="form-control" id="nmRekBlud" name="nmRek" value="<%= bank.nmRek %>" />
+                        </div>
+                    </div>
+                    <div class="form-text mt-3">Bukti kas SIM RS dengan jenis yang sama dalam periode cut off otomatis dimasukkan ke rekap. Senin 00.00&ndash;14.00; Selasa&ndash;Kamis 14.01 hari sebelumnya s.d. 14.00; Jumat 14.01 Kamis s.d. 13.00; Sabtu&ndash;Minggu direkap pada tanggal Minggu (13.01 Jumat s.d. 23.59 Minggu). Berlaku untuk TBP dan STS.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Nomor Bukti -->
+<div class="modal fade" id="buktiModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Pilih Nomor Bukti Kas SIM RS &mdash;
+                    <code id="buktiModalRekap">-</code>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive text-nowrap">
+                    <table class="table table-sm table-bordered w-100" id="buktiTersediaTable">
+                        <thead>
+                            <tr>
+                                <th class="col-cek text-center"><input type="checkbox" class="form-check-input" id="buktiPilihSemua" title="Pilih semua di halaman ini" /></th>
+                                <th class="col-tgljam">Tanggal</th>
+                                <th class="col-kode">No. Bukti</th>
+                                <th class="col-teks">Penyetor</th>
+                                <th class="col-sedang">Bank / Rek. BLUD</th>
+                                <th class="col-nominal text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="form-text" id="buktiTerpilihInfo">0 bukti dipilih</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnSimpanBukti">Tambah</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+      var canEdit = <%= akses.edit ? 'true' : 'false' %>;
+      var canDelete = <%= akses.delete ? 'true' : 'false' %>;
+      var canKirim = <%= akses.validasi ? 'true' : 'false' %>;
+      var bankDefault = <%- JSON.stringify(bank) %>;
+
+      function escapeHtml(value) {
+        return $('<div>').text(value == null ? '' : value).html();
+      }
+      function rupiah(v) { return 'Rp ' + Number(v || 0).toLocaleString('id-ID'); }
+      function tgl(v) { return v ? new Date(v + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'; }
+      function tglJam(v) {
+        var d = new Date(v);
+        return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      }
+      function uraianDefault(tanggal) {
+        return tanggal ? 'Rekap Penerimaan Tanggal ' + new Date(tanggal + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+      }
+      var statusBadge = {
+        success: '<span class="badge bg-label-success"><i class="bx bx-check"></i> Success</span>',
+        pending: '<span class="badge bg-label-warning">Pending</span>',
+        failed: '<span class="badge bg-label-danger">Failed</span>'
+      };
+
+      if ($.fn.DataTable.isDataTable('#rekapTable')) {
+        $('#rekapTable').DataTable().destroy();
+      }
+
+      var table = $('#rekapTable').DataTable({
+        serverSide: true,
+        processing: true,
+        ajax: { url: '/rekapPenerimaan/data' },
+        columns: [
+          { data: null, orderable: false, render: function (data, type, row, meta) { return meta.settings._iDisplayStart + meta.row + 1; } },
+          { data: 'noRekap', render: function (v) { return '<code class="fw-semibold">' + escapeHtml(v) + '</code>'; } },
+          { data: 'tanggal', render: tgl },
+          { data: 'jenis', render: escapeHtml },
+          { data: 'uraian', render: escapeHtml },
+          { data: 'tglSetor', render: tgl },
+          { data: 'statusApi', render: function (v) { return statusBadge[v] || escapeHtml(v); } },
+          {
+            data: null, orderable: false, className: 'text-nowrap', width: '1%',
+            render: function (data, type, row) {
+              var id = escapeHtml(row.noRekap);
+              var buttons = '<button class="btn btn-sm btn-info btn-detail me-1" data-id="' + id + '" title="Lihat"><i class="bx bx-show"></i></button>';
+              if (row.statusApi === 'success') {
+                return buttons + '<span class="text-success small fw-semibold"><i class="bx bx-check"></i> Terkirim</span>';
+              }
+              if (canKirim) {
+                buttons += row.statusApi === 'failed'
+                  ? '<button class="btn btn-sm btn-outline-warning btn-kirim me-1" data-id="' + id + '" title="Kirim ulang"><i class="bx bx-revision"></i> Retry</button>'
+                  : '<button class="btn btn-sm btn-outline-primary btn-kirim me-1" data-id="' + id + '" title="Kirim ke SIPKD"><i class="bx bx-send"></i></button>';
+              }
+              if (canEdit) buttons += '<button class="btn btn-sm btn-warning btn-edit me-1" data-id="' + id + '" title="Edit"><i class="bx bx-edit-alt"></i></button>';
+              if (canDelete) buttons += '<button class="btn btn-sm btn-danger btn-delete" data-id="' + id + '" title="Hapus"><i class="bx bx-trash"></i></button>';
+              return buttons;
+            }
+          }
+        ],
+        order: [[1, 'asc']],
+        language: {
+          processing: 'Sedang memproses...',
+          lengthMenu: 'Tampilkan _MENU_ entri',
+          zeroRecords: 'Tidak ditemukan data yang sesuai',
+          info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ entri',
+          infoEmpty: 'Menampilkan 0 sampai 0 dari 0 entri',
+          infoFiltered: '(disaring dari _MAX_ entri keseluruhan)',
+          search: 'Cari:',
+          searchPlaceholder: 'Nomor rekap',
+          paginate: { first: 'Pertama', previous: 'Sebelumnya', next: 'Selanjutnya', last: 'Terakhir' }
+        }
+      });
+
+      var rekapAktif = null;
+      var bisaUbah = false;
+
+      // Rincian rekap (dua tab): data lengkap dari /rekapPenerimaan/detail, paging/cari di sisi klien
+      function nomorUrut(dt) {
+        dt.on('draw.dt', function () {
+          dt.column(0, { search: 'applied', order: 'applied' }).nodes().each(function (cell, i) { cell.innerHTML = i + 1; });
+        });
+        return dt;
+      }
+      function nilaiRupiah(v, type) { return type === 'display' ? rupiah(v) : Number(v || 0); }
+      var bahasaRincian = $.extend({}, table.settings()[0].oLanguage, { sEmptyTable: 'Pilih salah satu rekap untuk melihat rinciannya' });
+
+      ['#rekapBuktiTable', '#rekapRekeningTable'].forEach(function (sel) {
+        if ($.fn.DataTable.isDataTable(sel)) $(sel).DataTable().destroy();
+      });
+      var buktiRekapTable = nomorUrut($('#rekapBuktiTable').DataTable({
+        data: [],
+        columns: [
+          { data: null, orderable: false, searchable: false },
+          { data: 'tanggal', render: function (v, type) { return type === 'display' ? escapeHtml(tglJam(v)) : v; } },
+          { data: 'noBukti', render: function (v) { return '<code>' + escapeHtml(v) + '</code>'; } },
+          { data: 'penyetor', render: escapeHtml },
+          { data: 'total', render: nilaiRupiah },
+          {
+            data: 'noBukti', orderable: false, searchable: false,
+            render: function (v) { return bisaUbah ? '<button class="btn btn-sm btn-danger btn-hapus-bukti" data-bukti="' + escapeHtml(v) + '" title="Lepas dari rekap"><i class="bx bx-trash"></i></button>' : ''; }
+          }
+        ],
+        order: [[1, 'asc']],
+        language: $.extend({}, bahasaRincian, { sSearchPlaceholder: 'No. bukti / penyetor' })
+      }));
+      var rekeningRekapTable = nomorUrut($('#rekapRekeningTable').DataTable({
+        data: [],
+        columns: [
+          { data: null, orderable: false, searchable: false },
+          { data: 'kdRek', render: function (v) { return '<code>' + escapeHtml(v) + '</code>'; } },
+          { data: 'rekening', render: escapeHtml },
+          { data: 'nilai', render: nilaiRupiah }
+        ],
+        order: [[1, 'asc']],
+        language: $.extend({}, bahasaRincian, { sSearchPlaceholder: 'Kode / nama rekening' })
+      }));
+
+      function loadDetail(id, scroll) {
+        $.get('/rekapPenerimaan/detail/' + encodeURIComponent(id), function (res) {
+          if (!res.success) return Swal.fire('Gagal', res.message, 'error');
+          var r = res.data;
+          rekapAktif = r;
+          bisaUbah = canEdit && r.statusApi !== 'success';
+          $('#btnTambahBukti').toggleClass('d-none', !bisaUbah);
+          $('#rekapDetailId').text(r.noRekap);
+          // periode.akhir eksklusif; mundurkan 1 menit untuk tampilan (mis. 14.01 → 14.00)
+          var periode = '-';
+          if (r.periode) {
+            var akhir = new Date(new Date(r.periode.akhir.replace(' ', 'T')).getTime() - 60000);
+            periode = tglJam(r.periode.mulai.replace(' ', 'T')) + ' s.d. ' + tglJam(akhir);
+          }
+          $('#rekapDetailInfo').text(r.jenis + ' · ' + r.uraian + ' · Periode ' + periode + ' · ' + r.bank + ' ' + r.noRek);
+          buktiRekapTable.search('').clear().rows.add(r.bukti).draw();
+          rekeningRekapTable.search('').clear().rows.add(r.rekening).draw();
+          $('.rekap-total').text(rupiah(r.total));
+          $('#rekapTotalInfo').text('(' + r.bukti.length + ' bukti)');
+          if (scroll) document.getElementById('rekapDetailCard').scrollIntoView({ behavior: 'smooth' });
+        });
+      }
+
+      function openModal(title, mode, data) {
+        $('#rekapModalTitle').text(title);
+        $('#rekapMode').val(mode);
+        $('#formRekap')[0].reset();
+        $('#noRekap').val(data.noRekap || '');
+        $('#tanggalRekap').val(data.tanggal || '');
+        $('#formRekap input[name="jenis"][value="' + (data.jenis || 'TBP') + '"]').prop('checked', true);
+        $('#uraianRekap').val(data.uraian || uraianDefault(data.tanggal));
+        $('#tglSetor').val(data.tglSetor || data.tanggal || '');
+        $('#bankRekap').val(data.bank || bankDefault.bank);
+        $('#noRekBlud').val(data.noRek || bankDefault.noRek);
+        $('#nmRekBlud').val(data.nmRek || bankDefault.nmRek);
+        $('#rekapModal').modal('show');
+      }
+
+      $('#tanggalRekap').off('change').on('change', function () {
+        if ($('#rekapMode').val() !== 'insert') return;
+        $('#uraianRekap').val(uraianDefault(this.value));
+        $('#tglSetor').val(this.value);
+      });
+
+      $('#btnGenerateRekap').off('click').on('click', function () {
+        $.get('/rekapPenerimaan/getNomorBaru', function (res) {
+          if (!res.success) return Swal.fire('Gagal', res.message, 'error');
+          openModal('Generate Data Rekap Baru', 'insert', { noRekap: res.data.noRekap, tanggal: new Date().toISOString().slice(0, 10) });
+        });
+      });
+
+      $('#rekapTable').off('click', '.btn-detail').on('click', '.btn-detail', function () {
+        loadDetail($(this).data('id'), true);
+      });
+
+      $('#rekapTable').off('click', '.btn-edit').on('click', '.btn-edit', function () {
+        $.get('/rekapPenerimaan/detail/' + encodeURIComponent($(this).data('id')), function (res) {
+          if (res.success) openModal('Edit Rekap', 'update', res.data);
+          else Swal.fire('Gagal', res.message, 'error');
+        });
+      });
+
+      $('#rekapTable').off('click', '.btn-delete').on('click', '.btn-delete', function () {
+        var id = $(this).data('id');
+        Swal.fire({
+          title: 'Hapus rekap ' + id + '?',
+          text: 'Data yang dihapus tidak dapat dikembalikan.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          confirmButtonText: 'Hapus',
+          cancelButtonText: 'Batal'
+        }).then(function (result) {
+          if (!result.isConfirmed) return;
+          $.ajax({ url: '/rekapPenerimaan/delete/' + encodeURIComponent(id), type: 'DELETE' })
+            .done(function (res) {
+              Swal.fire(res.success ? 'Berhasil' : 'Gagal', res.message, res.success ? 'success' : 'error');
+              if (res.success) table.ajax.reload(null, false);
+            })
+            .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); });
+        });
+      });
+
+      $('#rekapTable').off('click', '.btn-kirim').on('click', '.btn-kirim', function () {
+        var id = $(this).data('id');
+        Swal.fire({
+          title: 'Kirim ' + id + ' ke SIPKD?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Kirim',
+          cancelButtonText: 'Batal'
+        }).then(function (result) {
+          if (!result.isConfirmed) return;
+          $.post('/rekapPenerimaan/updateKirimUlang/' + encodeURIComponent(id))
+            .done(function (res) {
+              Swal.fire(res.success ? 'Berhasil' : 'Gagal', res.message, res.success ? 'success' : 'error');
+              if (res.success) table.ajax.reload(null, false);
+            })
+            .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); });
+        });
+      });
+
+      $('#formRekap').off('submit').on('submit', function () {
+        var url = $('#rekapMode').val() === 'update' ? '/rekapPenerimaan/update' : '/rekapPenerimaan/insert';
+        $.post(url, $(this).serialize())
+          .done(function (res) {
+            if (res.success) {
+              $('#rekapModal').modal('hide');
+              table.ajax.reload(null, false);
+              Swal.fire('Berhasil', res.message, 'success');
+            } else {
+              Swal.fire('Gagal', res.message, 'error');
+            }
+          })
+          .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); });
+      });
+
+      // Tambah nomor bukti: pilihan checkbox disimpan di objek supaya tetap ada saat pindah halaman
+      var buktiTerpilih = {};
+      var buktiTable = null;
+
+      function updateInfoTerpilih() {
+        $('#buktiTerpilihInfo').text(Object.keys(buktiTerpilih).length + ' bukti dipilih');
+      }
+
+      $('#btnTambahBukti').off('click').on('click', function () {
+        if (!rekapAktif) return;
+        buktiTerpilih = {};
+        updateInfoTerpilih();
+        $('#buktiModalRekap').text(rekapAktif.noRekap);
+        if (buktiTable) {
+          buktiTable.ajax.reload();
+        } else {
+          if ($.fn.DataTable.isDataTable('#buktiTersediaTable')) $('#buktiTersediaTable').DataTable().destroy();
+          buktiTable = $('#buktiTersediaTable').DataTable({
+            serverSide: true,
+            processing: true,
+            ajax: { url: '/rekapPenerimaan/dataBuktiTersedia', data: function (d) { d.noRekap = rekapAktif ? rekapAktif.noRekap : ''; } },
+            columns: [
+              {
+                data: 'noBukti', orderable: false, className: 'text-center', width: '1%',
+                render: function (v) { return '<input type="checkbox" class="form-check-input bukti-pilih" value="' + escapeHtml(v) + '"' + (buktiTerpilih[v] ? ' checked' : '') + '>'; }
+              },
+              { data: 'tanggal', render: function (v) { return escapeHtml(tglJam(v)); } },
+              { data: 'noBukti', render: function (v) { return '<code>' + escapeHtml(v) + '</code>'; } },
+              { data: 'penyetor', render: escapeHtml },
+              { data: 'bank', render: function (v, type, row) { return escapeHtml([row.bank, row.noRek].filter(Boolean).join(' - ')); } },
+              { data: 'total', className: 'text-end', render: rupiah }
+            ],
+            order: [[1, 'asc']],
+            language: table.settings()[0].oLanguage
+          });
+          buktiTable.on('draw', function () {
+            var semua = $('#buktiTersediaTable .bukti-pilih');
+            $('#buktiPilihSemua').prop('checked', semua.length > 0 && semua.filter(':checked').length === semua.length);
+          });
+        }
+        $('#buktiModal').modal('show');
+      });
+
+      $('#buktiTersediaTable').off('change', '.bukti-pilih').on('change', '.bukti-pilih', function () {
+        if (this.checked) buktiTerpilih[this.value] = true;
+        else delete buktiTerpilih[this.value];
+        updateInfoTerpilih();
+      });
+
+      $('#buktiPilihSemua').off('change').on('change', function () {
+        $('#buktiTersediaTable .bukti-pilih').prop('checked', this.checked).trigger('change');
+      });
+
+      $('#btnSimpanBukti').off('click').on('click', function () {
+        var daftar = Object.keys(buktiTerpilih);
+        if (!daftar.length) return Swal.fire('Perhatian', 'Pilih minimal satu nomor bukti', 'warning');
+        $.post('/rekapPenerimaan/tambahBukti', { noRekap: rekapAktif.noRekap, noBukti: daftar })
+          .done(function (res) {
+            if (res.success) {
+              $('#buktiModal').modal('hide');
+              loadDetail(rekapAktif.noRekap, false);
+              Swal.fire('Berhasil', res.message, 'success');
+            } else {
+              Swal.fire('Gagal', res.message, 'error');
+            }
+          })
+          .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); });
+      });
+
+      $('#rekapBuktiBody').off('click', '.btn-hapus-bukti').on('click', '.btn-hapus-bukti', function () {
+        var noBukti = $(this).data('bukti');
+        var noRekap = rekapAktif.noRekap;
+        Swal.fire({
+          title: 'Lepas bukti ' + noBukti + '?',
+          text: 'Bukti dikeluarkan dari rekap ' + noRekap + ' dan bisa ditambahkan lagi nanti.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          confirmButtonText: 'Hapus',
+          cancelButtonText: 'Batal'
+        }).then(function (result) {
+          if (!result.isConfirmed) return;
+          $.ajax({ url: '/rekapPenerimaan/hapusBukti/' + encodeURIComponent(noRekap) + '?noBukti=' + encodeURIComponent(noBukti), type: 'DELETE' })
+            .done(function (res) {
+              Swal.fire(res.success ? 'Berhasil' : 'Gagal', res.message, res.success ? 'success' : 'error');
+              if (res.success) loadDetail(noRekap, false);
+            })
+            .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); });
+        });
+      });
+
+      // Tampilkan rincian rekap pertama secara default
+      table.one('draw', function () {
+        var first = table.row(0).data();
+        if (first) loadDetail(first.noRekap, false);
+      });
+    })();
+</script>

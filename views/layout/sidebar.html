@@ -2,8 +2,8 @@
           <div class="app-brand demo">
             <a href="/" class="app-brand-link">
               <span class="app-brand-logo demo sidebar-brand-wrap">
-                <img src="/logo2.png" alt="<%= nameapp %>" class="sidebar-logo app-brand-img" />
-                <img src="/logo1.png" alt="<%= nameapp %>" class="sidebar-logo app-brand-img-collapsed" />
+                <span class="sidebar-brand-text app-brand-img">SIPADU</span>
+                <span class="sidebar-brand-text app-brand-img-collapsed">S</span>
               </span>
             </a>
 
@@ -19,14 +19,29 @@
 
           <ul class="menu-inner py-1">
             <% 
-            // Ikon menu level-1 berdasarkan nama FITUR; tambahkan mapping sesuai menu aplikasi Anda
-            function getIcon(nmFITUR) {
-              const icons = {
-                'Dashboard': 'bx-home-circle',
-                'Setting': 'bx-cog',
-                'Contoh': 'bx-table'
-              };
-              return icons[nmFITUR] || 'bx-circle';
+            // Ikon menu berdasarkan nama FITUR; tambahkan mapping sesuai menu aplikasi Anda.
+            // Level-1 tanpa mapping memakai bx-circle, submenu tanpa mapping tampil tanpa ikon.
+            const menuIcons = {
+              'Dashboard': 'bx-home-circle',
+              'Contoh': 'bx-table',
+              'Integrasi SIM RS': 'bx-transfer',
+              'Mapping Layanan & RBA': 'bx-git-merge',
+              'Data Kas SIM RS': 'bx-wallet',
+              'Rekap Transaksi Penerimaan': 'bx-spreadsheet',
+              'Berita Acara Penutupan': 'bx-file',
+              'Log API & Audit': 'bx-list-ul',
+              'Pengaturan Integrasi': 'bx-slider-alt',
+              'Setting': 'bx-cog',
+              'Data User': 'bx-user',
+              'Kelompok': 'bx-group',
+              'Hak Akses': 'bx-lock-alt',
+              'User Aplikasi': 'bx-user-circle',
+              'Developer': 'bx-code-alt',
+              'Fitur Menu': 'bx-menu',
+              'Generate Module': 'bx-extension'
+            };
+            function getIcon(nmFITUR, fallback) {
+              return menuIcons[nmFITUR] || (fallback === undefined ? 'bx-circle' : fallback);
             }
             %>
             <% menuArray.forEach(item => { %>
@@ -40,6 +55,7 @@
                 <% item.subMenus.forEach(sub => { %>
                 <li class="menu-item <%= sub.hasSub ? 'has-sub' : '' %>">
                   <a href="/<%= sub.url %>" class="menu-link <%= sub.hasSub ? 'menu-toggle' : '' %>">
+                    <% if (getIcon(sub.nmFITUR, '')) { %><i class="menu-icon tf-icons bx <%= getIcon(sub.nmFITUR, '') %>"></i><% } %>
                     <div><%= sub.nmFITUR %></div>
                   </a>
                   <% if (sub.subMenus && sub.subMenus.length > 0) { %>
@@ -47,6 +63,7 @@
                     <% sub.subMenus.forEach(sub2 => { %>
                     <li class="menu-item">
                       <a href="/<%= sub2.url %>" class="menu-link">
+                        <% if (getIcon(sub2.nmFITUR, '')) { %><i class="menu-icon tf-icons bx <%= getIcon(sub2.nmFITUR, '') %>"></i><% } %>
                         <div><%= sub2.nmFITUR %></div>
                       </a>
                     </li>
@@ -67,10 +84,10 @@
               menuData.pages.push({ name: item.nmFITUR, url: item.url, icon: getIcon(item.nmFITUR), category: 'Menu' });
               if (item.subMenus && item.subMenus.length > 0) {
                 item.subMenus.forEach(sub => {
-                  menuData.pages.push({ name: sub.nmFITUR, url: sub.url, icon: 'bx-circle', category: 'Submenu' });
+                  menuData.pages.push({ name: sub.nmFITUR, url: sub.url, icon: getIcon(sub.nmFITUR), category: 'Submenu' });
                   if (sub.subMenus && sub.subMenus.length > 0) {
                     sub.subMenus.forEach(sub2 => {
-                      menuData.pages.push({ name: sub2.nmFITUR, url: sub2.url, icon: 'bx-circle', category: 'Submenu' });
+                      menuData.pages.push({ name: sub2.nmFITUR, url: sub2.url, icon: getIcon(sub2.nmFITUR), category: 'Submenu' });
                     });
                   }
                 });

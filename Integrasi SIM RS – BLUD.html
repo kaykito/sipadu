@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Integrasi SIM RS – BLUD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy-950:#0b1f2b;
+  --navy-900:#102c3b;
+  --navy-800:#163a4d;
+  --navy-700:#1f4e66;
+  --teal-600:#0e6e6e;
+  --teal-500:#128080;
+  --teal-100:#e4f3f1;
+  --gold-500:#c8922b;
+  --gold-100:#faf0dc;
+  --green-600:#2f7d5c;
+  --green-100:#e3f3ea;
+  --red-600:#b3482f;
+  --red-100:#fbe8e2;
+  --ink-900:#141c22;
+  --ink-600:#51606a;
+  --ink-400:#8696a1;
+  --line:#dde4e6;
+  --surface:#ffffff;
+  --bg:#f3f6f6;
+  --radius:10px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c1518;
+    --surface:#132025;
+    --line:#223034;
+    --ink-900:#eef3f3;
+    --ink-600:#aebcc0;
+    --ink-400:#7e9196;
+    --teal-100:#143632;
+    --gold-100:#2c2110;
+    --green-100:#133225;
+    --red-100:#301b16;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c1518;
+  --surface:#132025;
+  --line:#223034;
+  --ink-900:#eef3f3;
+  --ink-600:#aebcc0;
+  --ink-400:#7e9196;
+  --teal-100:#143632;
+  --gold-100:#2c2110;
+  --green-100:#133225;
+  --red-100:#301b16;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:'IBM Plex Sans', system-ui, sans-serif;
+  background:var(--bg);
+  color:var(--ink-900);
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:'IBM Plex Mono', monospace;}
+a{color:inherit;}
+button{font-family:inherit;}
+
+/* ---------- Shell layout ---------- */
+.shell{
+  display:grid;
+  grid-template-columns: 252px 1fr;
+  min-height:100vh;
+}
+.sidebar{
+  background: linear-gradient(185deg, var(--navy-950), var(--navy-900) 60%, var(--navy-800));
+  color:#cfe2e4;
+  padding:22px 16px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow-y:auto;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:4px 8px 20px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  margin-bottom:14px;
+}
+.brand-mark{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(135deg, var(--teal-500), var(--gold-500));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;color:#06161a;font-size:14px;letter-spacing:-0.5px;
+  flex-shrink:0;
+}
+.brand-text .t1{font-size:13.5px;font-weight:600;color:#f3f7f6;line-height:1.25;}
+.brand-text .t2{font-size:11px;color:#8fb2b2;letter-spacing:.02em;}
+
+.nav-group-label{
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#5f818a;
+  padding:14px 10px 6px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  width:100%;
+  text-align:left;
+  padding:9px 10px;
+  border-radius:8px;
+  background:transparent;
+  border:none;
+  color:#b9d2d2;
+  font-size:13.5px;
+  cursor:pointer;
+  transition:background .12s ease, color .12s ease;
+}
+.nav-item svg{flex-shrink:0; opacity:.85;}
+.nav-item:hover{background:rgba(255,255,255,0.06); color:#eef7f6;}
+.nav-item.active{
+  background:rgba(18,128,128,0.35);
+  color:#fff;
+  box-shadow: inset 2px 0 0 var(--gold-500);
+}
+.nav-item .badge{
+  margin-left:auto;
+  background:var(--red-600);
+  color:#fff;
+  font-size:10px;
+  font-weight:600;
+  padding:1px 6px;
+  border-radius:20px;
+}
+.sidebar-foot{
+  margin-top:auto;
+  padding:14px 10px 0;
+  border-top:1px solid rgba(255,255,255,0.08);
+  font-size:11.5px;
+  color:#5f818a;
+  line-height:1.5;
+}
+
+/* ---------- Main ---------- */
+.main{min-width:0;}
+.topbar{
+  position:sticky; top:0; z-index:5;
+  background:var(--surface);
+  border-bottom:1px solid var(--line);
+  padding:14px 26px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding-top:calc(14px + env(safe-area-inset-top,0px));
+}
+.page-title{font-size:17px; font-weight:600;}
+.page-sub{font-size:12px; color:var(--ink-600); margin-top:1px;}
+.spacer{flex:1;}
+.conn-pill{
+  display:flex;align-items:center;gap:7px;
+  font-size:12px; font-weight:500;
+  background:var(--green-100); color:var(--green-600);
+  border:1px solid rgba(47,125,92,0.25);
+  padding:6px 12px; border-radius:30px;
+}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:var(--green-600);}
+.user-chip{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px; font-weight:500;
+  padding:5px 10px 5px 6px;
+  border:1px solid var(--line);
+  border-radius:30px;
+}
+.user-avatar{
+  width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(135deg,var(--teal-500),var(--navy-700));
+  color:#fff; font-size:11px; font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.content{padding:22px 26px 60px;}
+.view{display:none;}
+.view.active{display:block;}
+
+/* ---------- KPI cards ---------- */
+.kpi-row{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0,1fr));
+  gap:14px;
+  margin-bottom:18px;
+}
+.kpi-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:16px 16px 14px;
+}
+.kpi-label{font-size:12px; color:var(--ink-600); display:flex; align-items:center; justify-content:space-between;}
+.kpi-value{font-size:24px; font-weight:700; margin-top:7px; letter-spacing:-0.01em;}
+.kpi-delta{font-size:12px; margin-top:5px; font-weight:500;}
+.kpi-delta.up{color:var(--green-600);}
+.kpi-delta.warn{color:var(--gold-500);}
+.kpi-delta.down{color:var(--red-600);}
+.kpi-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* ---------- panels / cards ---------- */
+.grid-2{display:grid; grid-template-columns: 1.55fr 1fr; gap:14px; margin-bottom:14px;}
+.panel{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:18px 18px 16px;
+}
+.panel-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px; gap:10px;}
+.panel-title{font-size:14px; font-weight:600;}
+.panel-note{font-size:11.5px; color:var(--ink-400);}
+
+.legend-row{display:flex; gap:16px; flex-wrap:wrap; margin-top:12px;}
+.legend-item{display:flex;align-items:center;gap:7px; font-size:12px; color:var(--ink-600);}
+.legend-dot{width:9px;height:9px;border-radius:2px;}
+
+.activity-list{display:flex; flex-direction:column; gap:0;}
+.activity-row{
+  display:flex; gap:10px; align-items:flex-start;
+  padding:10px 0;
+  border-bottom:1px solid var(--line);
+}
+.activity-row:last-child{border-bottom:none; padding-bottom:0;}
+.act-dot{width:8px;height:8px;border-radius:50%; margin-top:5px; flex-shrink:0;}
+.act-dot.ok{background:var(--green-600);}
+.act-dot.err{background:var(--red-600);}
+.act-dot.info{background:var(--gold-500);}
+.act-text{font-size:12.5px; line-height:1.45;}
+.act-text .code{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-600);}
+.act-time{font-size:11px; color:var(--ink-400); white-space:nowrap; margin-left:auto; padding-top:1px;}
+
+/* ---------- tables ---------- */
+.table-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+.table-toolbar{
+  display:flex; align-items:center; gap:10px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.search-box{
+  display:flex; align-items:center; gap:8px;
+  border:1px solid var(--line); border-radius:8px;
+  padding:7px 10px; font-size:12.5px; color:var(--ink-600);
+  min-width:220px; background:var(--bg);
+}
+.search-box input{border:none; outline:none; background:transparent; font-size:12.5px; width:100%; color:var(--ink-900); font-family:inherit;}
+.select-chip{
+  border:1px solid var(--line); border-radius:8px; padding:7px 10px;
+  font-size:12.5px; background:var(--bg); color:var(--ink-600);
+}
+.btn{
+  border:none; border-radius:8px; padding:8px 14px; font-size:12.5px; font-weight:600;
+  cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+}
+.btn-primary{background:var(--teal-600); color:#fff;}
+.btn-primary:hover{background:var(--teal-500);}
+.btn-ghost{background:transparent; border:1px solid var(--line); color:var(--ink-600);}
+.btn-ghost:hover{background:var(--bg);}
+.btn-outline-gold{background:var(--gold-100); color:#8a611c; border:1px solid rgba(200,146,43,.4);}
+
+table{width:100%; border-collapse:collapse; font-size:12.8px;}
+thead th{
+  text-align:left; font-weight:600; color:var(--ink-600);
+  padding:10px 16px; border-bottom:1px solid var(--line);
+  white-space:nowrap; background:var(--bg);
+}
+tbody td{padding:11px 16px; border-bottom:1px solid var(--line); vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--teal-100);}
+.cell-strong{font-weight:600;}
+.cell-mono{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-600);}
+.cell-right{text-align:right;}
+
+.status-pill{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px;
+}
+.status-success{background:var(--green-100); color:var(--green-600);}
+.status-pending{background:var(--gold-100); color:#8a611c;}
+.status-failed{background:var(--red-100); color:var(--red-600);}
+
+.icon-btn{
+  width:28px;height:28px; border-radius:7px; border:1px solid var(--line);
+  background:var(--surface); display:inline-flex; align-items:center;justify-content:center;
+  cursor:pointer; color:var(--ink-600); margin-right:4px;
+}
+.icon-btn:hover{background:var(--bg);}
+.icon-btn.danger{color:var(--red-600);}
+.icon-btn.gold{color:#8a611c;}
+
+.pager{display:flex; align-items:center; justify-content:space-between; padding:12px 16px; font-size:12px; color:var(--ink-600);}
+.pager-btns{display:flex; gap:4px;}
+.pager-btns button{
+  width:26px;height:26px;border-radius:6px;border:1px solid var(--line); background:var(--surface);
+  font-size:12px; cursor:pointer; color:var(--ink-600);
+}
+.pager-btns button.active{background:var(--navy-900); color:#fff; border-color:var(--navy-900);}
+
+/* ---------- detail / tabs within panel ---------- */
+.subtabs{display:flex; gap:4px; margin-bottom:14px; border-bottom:1px solid var(--line);}
+.subtab{
+  padding:9px 4px; margin-bottom:-1px;
+  font-size:12.8px; color:var(--ink-600); font-weight:500;
+  border-bottom:2px solid transparent; cursor:pointer; margin-right:18px;
+}
+.subtab.active{color:var(--teal-600); border-bottom-color:var(--teal-600); font-weight:600;}
+
+/* ---------- forms ---------- */
+.form-grid{display:grid; grid-template-columns: 1fr 1fr; gap:16px 18px;}
+.field{display:flex; flex-direction:column; gap:6px;}
+.field.full{grid-column:1 / -1;}
+.field label{font-size:12.5px; font-weight:600; color:var(--ink-900);}
+.field .hint{font-size:11px; color:var(--ink-400); font-weight:400; margin-top:-3px;}
+.field input, .field select, .field textarea{
+  border:1px solid var(--line); border-radius:8px; padding:9px 11px;
+  font-size:13px; font-family:inherit; color:var(--ink-900); background:var(--surface);
+  outline:none;
+}
+.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--teal-500); box-shadow:0 0 0 3px rgba(18,128,128,0.14);}
+.radio-row{display:flex; gap:18px; align-items:center; padding-top:2px;}
+.radio-opt{display:flex; align-items:center; gap:7px; font-size:13px;}
+.toggle{position:relative; width:38px; height:21px; border-radius:20px; background:var(--line); display:inline-block; flex-shrink:0; cursor:pointer;}
+.toggle.on{background:var(--teal-600);}
+.toggle::after{content:""; position:absolute; top:2px; left:2px; width:17px; height:17px; border-radius:50%; background:#fff; transition:.15s;}
+.toggle.on::after{left:19px;}
+
+.note-box{
+  background:var(--teal-100); border:1px solid rgba(18,128,128,0.2);
+  border-radius:8px; padding:12px 14px; font-size:12px; color:var(--ink-600); line-height:1.55;
+}
+
+/* ---------- log entries ---------- */
+.log-entry{border:1px solid var(--line); border-radius:8px; margin-bottom:9px; overflow:hidden;}
+.log-head{
+  display:flex; align-items:center; gap:10px; padding:11px 14px; cursor:pointer; font-size:12.5px;
+  background:var(--surface);
+}
+.log-body{
+  padding:12px 14px; border-top:1px solid var(--line);
+  background:var(--bg); font-family:'IBM Plex Mono',monospace; font-size:11.8px; color:var(--ink-600);
+  display:none; white-space:pre-wrap; line-height:1.6;
+}
+.log-entry.open .log-body{display:block;}
+.log-code{font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:5px;}
+.log-code.ok{background:var(--green-100); color:var(--green-600);}
+.log-code.err{background:var(--red-100); color:var(--red-600);}
+
+footer.app-foot{font-size:11px; color:var(--ink-400); text-align:center; padding:18px 0 4px;}
+
+@media (max-width: 980px){
+  .shell{grid-template-columns:1fr;}
+  .sidebar{position:fixed; left:-260px; width:240px; z-index:30; transition:left .18s ease; box-shadow:0 0 40px rgba(0,0,0,.3);}
+  .sidebar.open{left:0;}
+  .menu-btn{display:flex !important;}
+  .grid-2{grid-template-columns:1fr;}
+  .kpi-row{grid-template-columns:repeat(2,1fr);}
+  .form-grid{grid-template-columns:1fr;}
+  .content{padding:16px;}
+  .topbar{padding:12px 16px;}
+}
+.menu-btn{
+  display:none; width:34px;height:34px; border-radius:8px; border:1px solid var(--line);
+  background:var(--surface); align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+}
+.overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:25;}
+.overlay.show{display:block;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">RS</div>
+      <div class="brand-text">
+        <div class="t1">Integrasi SIM RS – BLUD</div>
+        <div class="t2">RSUD · Modul Keuangan</div>
+      </div>
+    </div>
+
+    <div class="nav-group-label">Ringkasan</div>
+    <button class="nav-item active" data-view="dashboard">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+      Dashboard
+    </button>
+
+    <div class="nav-group-label">Data Transaksi</div>
+    <button class="nav-item" data-view="mapping">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h7M4 12h16M4 17h11"/><circle cx="18" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+      Mapping Layanan &amp; RBA
+    </button>
+    <button class="nav-item" data-view="kas">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="7.5" cy="14.5" r="1.1" fill="currentColor" stroke="none"/></svg>
+      Data Kas SIM RS
+    </button>
+    <button class="nav-item" data-view="rekap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 16.5h6"/></svg>
+      Rekap Transaksi Penerimaan
+      <span class="badge">2</span>
+    </button>
+    <button class="nav-item" data-view="berita">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M14 3v6h6M9 13h6M9 17h4"/></svg>
+      Berita Acara Penutupan
+    </button>
+
+    <div class="nav-group-label">Sistem</div>
+    <button class="nav-item" data-view="log">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v4H4zM4 10h16M4 14h10M4 18h7"/></svg>
+      Log API &amp; Audit
+    </button>
+    <button class="nav-item" data-view="pengaturan">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.3-2-3.4-2.3.8a7.7 7.7 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.6a7.7 7.7 0 0 0-2.6 1.5l-2.3-.8-2 3.4 2 1.3a7.6 7.6 0 0 0 0 3l-2 1.3 2 3.4 2.3-.8a7.7 7.7 0 0 0 2.6 1.5l.5 2.6h4l.5-2.6a7.7 7.7 0 0 0 2.6-1.5l2.3.8 2-3.4Z"/></svg>
+      Pengaturan
+    </button>
+
+    <div class="sidebar-foot">
+      RSUD Kabupaten · BPD Bali<br>
+      Rek. 456-004-9311
+    </div>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <div class="page-sub" id="pageSub">Ringkasan integrasi pendapatan SIM RS ke BLUD</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="conn-pill"><span class="conn-dot"></span> SIPKD API Terhubung</div>
+      <div class="user-chip"><div class="user-avatar">AK</div> Admin Keuangan</div>
+    </div>
+
+    <div class="content">
+
+      <!-- ===================== DASHBOARD ===================== -->
+      <section class="view active" id="view-dashboard">
+
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-label">Pendapatan hari ini <span class="kpi-icon" style="background:var(--teal-100);color:var(--teal-600)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </span></div>
+            <div class="kpi-value">Rp 63.817.610</div>
+            <div class="kpi-delta up">▲ 5,2% dari hari sebelumnya</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Transaksi tercatat <span class="kpi-icon" style="background:var(--green-100);color:var(--green-600)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+            </span></div>
+            <div class="kpi-value">78</div>
+            <div class="kpi-delta up">TBP 89,7% · STS 10,3%</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Menunggu diunggah <span class="kpi-icon" style="background:var(--gold-100);color:#8a611c">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            </span></div>
+            <div class="kpi-value">2 dokumen</div>
+            <div class="kpi-delta warn">Menunggu sinkronisasi berikutnya</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Gagal kirim ke SIPKD <span class="kpi-icon" style="background:var(--red-100);color:var(--red-600)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+            </span></div>
+            <div class="kpi-value">1 dokumen</div>
+            <div class="kpi-delta down">Perlu tindakan — lihat Log API</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Tren pendapatan per jam</div>
+                <div class="panel-note">16 November 2022 · total Rp 63.817.610</div>
+              </div>
+              <select class="select-chip"><option>Hari ini</option><option>Kemarin</option><option>7 hari terakhir</option></select>
+            </div>
+            <svg viewBox="0 0 640 210" width="100%" height="210" style="overflow:visible">
+              <defs>
+                <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#128080" stop-opacity="0.28"/>
+                  <stop offset="100%" stop-color="#128080" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- gridlines -->
+              <g stroke="var(--line)" stroke-width="1">
+                <line x1="40" y1="20" x2="40" y2="165"/>
+                <line x1="40" y1="165" x2="620" y2="165"/>
+              </g>
+              <!-- y labels -->
+              <g font-size="10" fill="var(--ink-400)" font-family="IBM Plex Mono, monospace">
+                <text x="0" y="24">32,5jt</text>
+                <text x="0" y="78">21,7jt</text>
+                <text x="0" y="132">10,8jt</text>
+                <text x="0" y="168">0</text>
+              </g>
+              <!-- area + line: hours 07..14, values scaled -->
+              <polygon fill="url(#areaFill)" points="60,163 118,160 176,154 234,20 292,55 350,160 408,165 466,165 466,165 60,165"/>
+              <polyline fill="none" stroke="#128080" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
+                points="60,163 118,160 176,154 234,20 292,55 350,160 408,165 466,165"/>
+              <g fill="#128080">
+                <circle cx="60" cy="163" r="3"/><circle cx="118" cy="160" r="3"/><circle cx="176" cy="154" r="3"/>
+                <circle cx="234" cy="20" r="3.5"/><circle cx="292" cy="55" r="3"/><circle cx="350" cy="160" r="3"/>
+                <circle cx="408" cy="165" r="3"/><circle cx="466" cy="165" r="3"/>
+              </g>
+              <g font-size="10.5" fill="var(--ink-600)" text-anchor="middle" font-family="IBM Plex Mono, monospace">
+                <text x="60" y="182">07:00</text><text x="118" y="182">08:00</text><text x="176" y="182">09:00</text>
+                <text x="234" y="182">10:00</text><text x="292" y="182">11:00</text><text x="350" y="182">12:00</text>
+                <text x="408" y="182">13:00</text><text x="466" y="182">14:00</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Komposisi layanan</div>
+            </div>
+            <svg viewBox="0 0 200 200" width="100%" height="170">
+              <g transform="translate(100,100)">
+                <circle r="70" fill="none" stroke="var(--line)" stroke-width="22"/>
+                <!-- Rawat Jalan 94.2% -->
+                <circle r="70" fill="none" stroke="#128080" stroke-width="22"
+                  stroke-dasharray="414.7 440" stroke-dashoffset="0" transform="rotate(-90)"/>
+                <!-- Obat 5.8% -->
+                <circle r="70" fill="none" stroke="#c8922b" stroke-width="22"
+                  stroke-dasharray="25.5 440" stroke-dashoffset="-414.7" transform="rotate(-90)"/>
+                <text text-anchor="middle" y="-2" font-size="19" font-weight="700" fill="var(--ink-900)">63,8jt</text>
+                <text text-anchor="middle" y="16" font-size="10.5" fill="var(--ink-400)">total hari ini</text>
+              </g>
+            </svg>
+            <div class="legend-row">
+              <div class="legend-item"><span class="legend-dot" style="background:#128080"></span> Rawat Jalan — 94,2%</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#c8922b"></span> Obat — 5,8%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Aktivitas sistem terkini</div>
+              <a href="#" class="panel-note" onclick="goView('log');return false;" style="color:var(--teal-600); font-weight:600;">Lihat semua →</a>
+            </div>
+            <div class="activity-list">
+              <div class="activity-row">
+                <span class="act-dot ok"></span>
+                <div class="act-text">Sinkronisasi otomatis <span class="code">RKP-20221116-078</span> berhasil dikirim ke SIPKD</div>
+                <div class="act-time">Hari ini, 23:59 WITA</div>
+              </div>
+              <div class="activity-row">
+                <span class="act-dot err"></span>
+                <div class="act-text">Gagal koneksi ke API SIPKD (Timeout) pada <span class="code">RKP-20221116-079</span></div>
+                <div class="act-time">Hari ini, 23:58 WITA</div>
+              </div>
+              <div class="activity-row">
+                <span class="act-dot info"></span>
+                <div class="act-text">Admin Keuangan menyinkronkan mapping rekening RBA</div>
+                <div class="act-time">Hari ini, 14:02 WITA</div>
+              </div>
+              <div class="activity-row">
+                <span class="act-dot ok"></span>
+                <div class="act-text">Berita Acara Penutupan Kas <span class="code">BA-20221115</span> ditandatangani</div>
+                <div class="act-time">Kemarin, 17:10 WITA</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Jenis penerimaan</div>
+              <div class="panel-note">30 hari terakhir</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:14px;">
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+                  <span>TBP (Tanda Bukti Pembayaran)</span><span class="cell-strong">Rp 2.891.264.775</span>
+                </div>
+                <div style="height:8px;border-radius:5px;background:var(--line);overflow:hidden;"><div style="height:100%;width:60.4%;background:#128080;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+                  <span>STS (Surat Tanda Setoran)</span><span class="cell-strong">Rp 1.898.257.649</span>
+                </div>
+                <div style="height:8px;border-radius:5px;background:var(--line);overflow:hidden;"><div style="height:100%;width:39.6%;background:#c8922b;"></div></div>
+              </div>
+              <div class="note-box">Total akumulasi pendapatan terintegrasi periode berjalan: <strong>Rp 4.789.522.424</strong> dari 4.043 bukti transaksi SIM RS.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== MAPPING ===================== -->
+      <section class="view" id="view-mapping">
+        <div class="table-card" style="margin-bottom:16px;">
+          <div class="table-toolbar">
+            <div>
+              <div style="font-size:13.5px; font-weight:600;">Rekening Pendapatan RBA</div>
+              <div class="panel-note" style="margin-top:2px;">Peta akun pendapatan sesuai struktur RBA BLUD</div>
+            </div>
+            <div class="spacer"></div>
+            <button class="btn btn-primary">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"/></svg>
+              Sinkronisasi Mapping
+            </button>
+          </div>
+          <table>
+            <thead><tr><th>Kode Rekening</th><th>Uraian</th><th>Level</th><th>Layanan terhubung</th><th></th></tr></thead>
+            <tbody>
+              <tr><td class="cell-mono">4.1.1.01.01.0001</td><td>Pendapatan Rawat Jalan Pasien Umum</td><td>6</td><td>Registrasi, Tindakan, Biaya Lain</td><td><button class="icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-3.5L16 6a2 2 0 0 1 3 3L7.5 20.5H4Z"/></svg></button></td></tr>
+              <tr><td class="cell-mono">4.1.1.01.02.0001</td><td>Pendapatan Operasi dan Rawat Inap</td><td>6</td><td>Tindakan, BED, Registrasi</td><td><button class="icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-3.5L16 6a2 2 0 0 1 3 3L7.5 20.5H4Z"/></svg></button></td></tr>
+              <tr><td class="cell-mono">4.1.1.01.03.0001</td><td>Pendapatan Obat-Obatan</td><td>6</td><td>Obat-Obatan</td><td><button class="icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-3.5L16 6a2 2 0 0 1 3 3L7.5 20.5H4Z"/></svg></button></td></tr>
+              <tr><td class="cell-mono">4.1.1.01.04.0001</td><td>Pendapatan Magang Orientasi / Penelitian Dokter</td><td>6</td><td>Izin Penelitian</td><td><button class="icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-3.5L16 6a2 2 0 0 1 3 3L7.5 20.5H4Z"/></svg></button></td></tr>
+            </tbody>
+          </table>
+          <div class="pager"><span>Menampilkan 1–4 dari 4 rekening</span></div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-toolbar">
+            <div style="font-size:13.5px; font-weight:600;">Daftar Layanan RS</div>
+            <div class="spacer"></div>
+            <div class="search-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input placeholder="Cari kode / uraian layanan">
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Kode</th><th>Uraian Layanan</th><th>Rekening RBA</th></tr></thead>
+            <tbody>
+              <tr><td class="cell-mono">01.01</td><td>Konsultasi Dokter Spesialis</td><td>4.1.1.01.01.0001 – Rawat Jalan</td></tr>
+              <tr><td class="cell-mono">01.02</td><td>Registrasi Pasien Umum</td><td>4.1.1.01.01.0001 – Rawat Jalan</td></tr>
+              <tr><td class="cell-mono">02.01</td><td>Tindakan Operasi / Rawat Inap</td><td>4.1.1.01.02.0001 – Operasi &amp; Rawat Inap</td></tr>
+              <tr><td class="cell-mono">03.01</td><td>Resep Obat Apotek</td><td>4.1.1.01.03.0001 – Obat-Obatan</td></tr>
+            </tbody>
+          </table>
+          <div class="pager"><span>Menampilkan 1–4 dari 128 layanan</span>
+            <div class="pager-btns"><button class="active">1</button><button>2</button><button>3</button><button>›</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== DATA KAS SIM RS ===================== -->
+      <section class="view" id="view-kas">
+        <div class="table-card" style="margin-bottom:16px;">
+          <div class="table-toolbar">
+            <div class="search-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input placeholder="Cari no. bukti / penyetor">
+            </div>
+            <select class="select-chip"><option>Semua jenis</option><option>TBP</option><option>STS</option></select>
+            <select class="select-chip"><option>16/11/2022</option><option>17/11/2022</option></select>
+            <div class="spacer"></div>
+            <button class="btn btn-primary">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"/></svg>
+              Sinkronisasi Data
+            </button>
+          </div>
+          <table>
+            <thead><tr><th>Tanggal</th><th>No. Bukti</th><th>Penyetor</th><th>Bank / Rek. BLUD</th><th>Jenis</th><th class="cell-right">Total</th><th></th></tr></thead>
+            <tbody id="kasTbody"></tbody>
+          </table>
+          <div class="pager"><span id="kasPagerInfo">Menampilkan 1–8 dari 78 bukti</span>
+            <div class="pager-btns"><button class="active">1</button><button>2</button><button>3</button><button>›</button></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Rincian Data Kas SIM RS</div>
+              <div class="panel-note">Nomor Bukti <span class="cell-mono" style="color:var(--teal-600); font-weight:600;">DX0162005A</span> · NITRAN I NYOMAN · 16/11/2022 08:09</div>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Kode Rekening</th><th>Rekening</th><th>Uraian</th><th class="cell-right">Nilai</th></tr></thead>
+            <tbody>
+              <tr><td class="cell-mono">4.1.1.01.03.</td><td>Obat</td><td>Obat-Obatan</td><td class="cell-right">Rp 211.300</td></tr>
+              <tr><td class="cell-mono">4.1.1.01.01.</td><td>Rawat Jalan</td><td>Registrasi</td><td class="cell-right">Rp 60.000</td></tr>
+              <tr><td class="cell-mono">4.1.1.01.01.</td><td>Rawat Jalan</td><td>Tindakan</td><td class="cell-right">Rp 20.000</td></tr>
+            </tbody>
+            <tfoot><tr><td colspan="3" style="font-weight:600; padding:11px 16px;">Total</td><td class="cell-right" style="font-weight:700;">Rp 291.300</td></tr></tfoot>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===================== REKAP TRANSAKSI ===================== -->
+      <section class="view" id="view-rekap">
+        <div class="table-card" style="margin-bottom:16px;">
+          <div class="table-toolbar">
+            <div class="search-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input placeholder="Cari nomor rekap">
+            </div>
+            <div class="spacer"></div>
+            <button class="btn btn-primary" id="btnGenerateRekap">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 5v14M5 12h14"/></svg>
+              Generate Data Rekap Baru
+            </button>
+          </div>
+          <table>
+            <thead><tr><th>Nomor</th><th>Tanggal</th><th>Jenis</th><th>Uraian</th><th>Tanggal Setor</th><th>Status API</th><th></th></tr></thead>
+            <tbody>
+              <tr class="rekap-row active" data-id="RKP-00001">
+                <td class="cell-strong cell-mono">RKP-00001</td><td>16 Nov 2022</td><td>TBP</td>
+                <td>Rekap Penerimaan Tanggal 16 November 2022</td><td>16 Nov 2022</td>
+                <td><span class="status-pill status-pending">● Pending</span></td>
+                <td><button class="icon-btn" title="Lihat"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="icon-btn gold" title="Ubah"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-3.5L16 6a2 2 0 0 1 3 3L7.5 20.5H4Z"/></svg></button><button class="icon-btn danger" title="Hapus"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button></td>
+              </tr>
+              <tr class="rekap-row" data-id="RKP-00002">
+                <td class="cell-strong cell-mono">RKP-00002</td><td>17 Nov 2022</td><td>STS</td>
+                <td>Rekap Penerimaan transfer/QRIS tanggal 17 November 2022</td><td>17 Nov 2022</td>
+                <td><span class="status-pill status-failed">● Failed</span></td>
+                <td><button class="btn btn-outline-gold" style="padding:5px 10px; font-size:11.5px;">↻ Retry</button></td>
+              </tr>
+              <tr class="rekap-row" data-id="RKP-00003">
+                <td class="cell-strong cell-mono">RKP-00003</td><td>18 Nov 2022</td><td>TBP</td>
+                <td>Rekap Penerimaan Tanggal 18 November 2022</td><td>18 Nov 2022</td>
+                <td><span class="status-pill status-success">✓ Success</span></td>
+                <td><span style="font-size:11.5px; color:var(--green-600); font-weight:600;">✓ Terkirim</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pager"><span>Menampilkan 1–3 dari 3 rekap</span></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Rincian Rekap — <span class="cell-mono" id="rekapDetailId" style="color:var(--teal-600);">RKP-00001</span></div>
+          </div>
+          <div class="subtabs">
+            <div class="subtab active" data-tab="bukti">Rincian per Nomor Bukti SIM RS</div>
+            <div class="subtab" data-tab="rekening">Rekap Rekening BLUD</div>
+          </div>
+
+          <div class="subtab-panel" id="tab-bukti">
+            <table>
+              <thead><tr><th>Tanggal</th><th>No. Bukti</th><th>Penyetor</th><th class="cell-right">Total</th></tr></thead>
+              <tbody>
+                <tr><td>16/11/2022 08:09</td><td class="cell-mono">DX0162005A</td><td>NITRAN I NYOMAN</td><td class="cell-right">Rp 291.300</td></tr>
+                <tr><td>16/11/2022 07:29</td><td class="cell-mono">DX0162000A</td><td>GLEMOH NI MADE</td><td class="cell-right">Rp 95.500</td></tr>
+                <tr><td>16/11/2022 08:44</td><td class="cell-mono">DX0162009A</td><td>VERRY</td><td class="cell-right">Rp 82.900</td></tr>
+              </tbody>
+              <tfoot><tr><td colspan="3" style="font-weight:600; padding:11px 16px;">Total</td><td class="cell-right" style="font-weight:700;">Rp 469.700</td></tr></tfoot>
+            </table>
+          </div>
+
+          <div class="subtab-panel" id="tab-rekening" style="display:none;">
+            <table>
+              <thead><tr><th>Kode Rekening</th><th>Rekening</th><th class="cell-right">Nilai</th></tr></thead>
+              <tbody>
+                <tr><td class="cell-mono">4.1.1.01.03.</td><td>Obat</td><td class="cell-right">Rp 211.300</td></tr>
+                <tr><td class="cell-mono">4.1.1.01.01.</td><td>Rawat Jalan</td><td class="cell-right">Rp 258.400</td></tr>
+                <tr><td class="cell-mono">4.1.1.01.01.</td><td>Rawat Jalan</td><td class="cell-right">Rp 20.000</td></tr>
+              </tbody>
+              <tfoot><tr><td colspan="2" style="font-weight:600; padding:11px 16px;">Total</td><td class="cell-right" style="font-weight:700;">Rp 469.700</td></tr></tfoot>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== BERITA ACARA ===================== -->
+      <section class="view" id="view-berita">
+        <div class="table-card">
+          <div class="table-toolbar">
+            <div style="font-size:13.5px; font-weight:600;">Berita Acara Penutupan Kas Harian</div>
+            <div class="spacer"></div>
+            <button class="btn btn-primary">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 5v14M5 12h14"/></svg>
+              Buat Berita Acara
+            </button>
+          </div>
+          <table>
+            <thead><tr><th>Nomor BA</th><th>Tanggal Kas</th><th>Total Setoran</th><th>Jumlah Bukti</th><th>Status</th><th>Ditandatangani oleh</th><th></th></tr></thead>
+            <tbody>
+              <tr><td class="cell-mono">BA-20221116</td><td>16 Nov 2022</td><td>Rp 63.817.610</td><td>78</td><td><span class="status-pill status-pending">● Menunggu TTD</span></td><td>—</td><td><button class="icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></td></tr>
+              <tr><td class="cell-mono">BA-20221115</td><td>15 Nov 2022</td><td>Rp 58.204.300</td><td>65</td><td><span class="status-pill status-success">✓ Selesai</span></td><td>Kepala Keuangan BLUD</td><td><button class="icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></td></tr>
+              <tr><td class="cell-mono">BA-20221114</td><td>14 Nov 2022</td><td>Rp 71.992.800</td><td>82</td><td><span class="status-pill status-success">✓ Selesai</span></td><td>Kepala Keuangan BLUD</td><td><button class="icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></td></tr>
+            </tbody>
+          </table>
+          <div class="pager"><span>Menampilkan 1–3 dari 72 berita acara</span></div>
+        </div>
+      </section>
+
+      <!-- ===================== LOG API & AUDIT ===================== -->
+      <section class="view" id="view-log">
+        <div class="table-card">
+          <div class="table-toolbar">
+            <div style="font-size:13.5px; font-weight:600;">System Trace &amp; API Logs</div>
+            <div class="spacer"></div>
+            <input type="date" class="select-chip" value="2026-10-24">
+            <select class="select-chip"><option>Semua Status</option><option>Success</option><option>Failed</option></select>
+            <button class="btn btn-ghost">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.5V19l4 2v-8.5L22 3Z"/></svg>
+              Filter Logs
+            </button>
+          </div>
+          <div style="padding:14px 16px;">
+            <div class="log-entry open">
+              <div class="log-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="log-code err">HTTP 500</span>
+                <span class="cell-mono">[2026-10-21 23:45:12] POST /api/v1/terima-pendapatan</span>
+                <span style="margin-left:auto; color:var(--ink-400);">RKP-20261021-412</span>
+              </div>
+              <div class="log-body">{
+  "endpoint": "/api/v1/terima-pendapatan",
+  "status": 500,
+  "error": "Gateway Timeout dari server SIPKD Provinsi",
+  "payload_ref": "RKP-20261021-412",
+  "retry_count": 2,
+  "saran": "Periksa whitelist IP publik Server SIM-RS pada firewall SIPKD, atau hubungi tim infrastruktur IT provinsi."
+}</div>
+            </div>
+            <div class="log-entry">
+              <div class="log-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="log-code ok">HTTP 200</span>
+                <span class="cell-mono">[2026-10-20 23:59:01] POST /api/v1/terima-pendapatan</span>
+                <span style="margin-left:auto; color:var(--ink-400);">RKP-20261020-411</span>
+              </div>
+              <div class="log-body">{
+  "endpoint": "/api/v1/terima-pendapatan",
+  "status": 200,
+  "message": "Data pendapatan berhasil diterima dan dicatat oleh SIPKD",
+  "payload_ref": "RKP-20261020-411",
+  "waktu_proses_ms": 842
+}</div>
+            </div>
+            <div class="log-entry">
+              <div class="log-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="log-code ok">HTTP 200</span>
+                <span class="cell-mono">[2026-10-20 01:00:04] AUTO-SYNC scheduler</span>
+                <span style="margin-left:auto; color:var(--ink-400);">RKP-20261020-411</span>
+              </div>
+              <div class="log-body">{
+  "job": "auto-sync-harian",
+  "status": 200,
+  "message": "Auto-sync RKP-20221020-411 berhasil",
+  "dipicu_oleh": "scheduler (23:59 WITA)"
+}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== PENGATURAN ===================== -->
+      <section class="view" id="view-pengaturan">
+        <div class="panel" style="margin-bottom:16px;">
+          <div class="panel-head"><div class="panel-title">1. Konfigurasi Endpoint SIPKD BLUD</div></div>
+          <div class="form-grid">
+            <div class="field full">
+              <label>URL Base API SIPKD</label>
+              <input type="text" value="https://sipkd.baliprov.go.id/api/v1/">
+            </div>
+            <div class="field full">
+              <label>Bearer Token / API Key</label>
+              <input type="password" value="••••••••••••••••••••••••••••">
+              <div class="hint">Token di-generate dari admin SIPKD Provinsi.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-bottom:16px;">
+          <div class="panel-head"><div class="panel-title">2. Pengaturan Sinkronisasi Otomatis (Scheduler)</div></div>
+          <div class="form-grid">
+            <div class="field full" style="flex-direction:row; align-items:center; gap:10px;">
+              <span class="toggle on" onclick="this.classList.toggle('on')"></span>
+              <label style="font-weight:500;">Aktifkan Auto-Sync Harian</label>
+            </div>
+            <div class="field">
+              <label>Waktu Eksekusi (WITA)</label>
+              <input type="time" value="23:59">
+              <div class="hint">Sistem akan otomatis me-rekap dan mengirim data pada jam tersebut. Sesuaikan dengan jadwal tutup kas harian.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button class="btn btn-ghost">Batal</button>
+          <button class="btn btn-primary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+            Simpan Konfigurasi
+          </button>
+        </div>
+      </section>
+
+    </div>
+    <footer class="app-foot">Mockup tampilan — Integrasi Data SIM RS &amp; BLUD · data contoh diolah dari kas-blud.csv</footer>
+  </main>
+</div>
+
+<!-- Modal: Generate Rekap -->
+<div id="modalBackdrop" style="display:none; position:fixed; inset:0; background:rgba(11,31,43,.5); z-index:50; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:var(--surface); border-radius:12px; width:100%; max-width:480px; padding:22px; max-height:90vh; overflow:auto;">
+    <div style="display:flex; align-items:center; justify-content:between; margin-bottom:16px;">
+      <div style="font-size:15px; font-weight:700;">Generate Data Rekap Baru</div>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>Nomor Rekap</label><input value="RKP-00004" disabled></div>
+      <div class="field"><label>Tanggal Rekap</label><input type="date" value="2022-11-19"></div>
+      <div class="field full">
+        <label>Jenis</label>
+        <div class="radio-row">
+          <label class="radio-opt"><input type="radio" name="jenisrekap" checked> TBP</label>
+          <label class="radio-opt"><input type="radio" name="jenisrekap"> STS</label>
+        </div>
+      </div>
+      <div class="field full"><label>Uraian Rekap</label><textarea rows="2">Rekap Penerimaan Tanggal 19 November 2022</textarea></div>
+      <div class="field"><label>Tanggal Setor</label><input type="date" value="2022-11-19"></div>
+      <div class="field"><label>Bank Tujuan</label><select><option>BPD Bali</option></select></div>
+      <div class="field"><label>No. Rekening BLUD</label><input value="456-004-9311"></div>
+      <div class="field"><label>Nama Rekening</label><input value="RSUD – Kas BLUD"></div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+      <button class="btn btn-ghost" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" onclick="closeModal()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- Dummy "Data Kas SIM RS" rows derived from real CSV sample (16/11/2022) ----
+const kasRows = [
+  ["16/11/2022 08:09","DX0162005A","NITRAN I NYOMAN","BPD Bali · 456-004-9311","TBP","Rp 291.300","success"],
+  ["16/11/2022 07:29","DX0162000A","GLEMOH NI MADE","BPD Bali · 456-004-9311","STS","Rp 95.500","success"],
+  ["16/11/2022 08:44","DX0162009A","VERRY","BPD Bali · 456-004-9311","STS","Rp 82.900","success"],
+  ["16/11/2022 09:07","DX0162013A","LABA I NYOMAN","BPD Bali · 456-004-9311","TBP","Rp 280.000","success"],
+  ["16/11/2022 09:19","DX0162017A","DEWI DHARMA PRADNYANTARI IDA AYU","BPD Bali · 456-004-9311","TBP","Rp 184.600","success"],
+  ["16/11/2022 10:03","DX0162029A","FERRARIS BOLENS ANNE C","BPD Bali · 456-004-9311","STS","Rp 598.000","pending"],
+  ["16/11/2022 10:45","DX0162042A","HELGA HOFFMAN","BPD Bali · 456-004-9311","TBP","Rp 1.072.000","success"],
+  ["16/11/2022 11:15","DX0162053A","CLIFFORD ALAN SAMUELS","BPD Bali · 456-004-9311","STS","Rp 1.408.500","failed"],
+];
+const statusPill = s => s==="success" ? '<span class="status-pill status-success">✓ Tersinkron</span>'
+  : s==="pending" ? '<span class="status-pill status-pending">● Pending</span>'
+  : '<span class="status-pill status-failed">● Gagal</span>';
+
+const kasTbody = document.getElementById('kasTbody');
+kasTbody.innerHTML = kasRows.map(r => `
+  <tr>
+    <td>${r[0]}</td>
+    <td class="cell-mono">${r[1]}</td>
+    <td>${r[2]}</td>
+    <td style="color:var(--ink-600)">${r[3]}</td>
+    <td>${r[4]}</td>
+    <td class="cell-right cell-strong">${r[5]}</td>
+    <td>${statusPill(r[6])}</td>
+  </tr>
+`).join('');
+
+// ---- Navigation ----
+const navItems = document.querySelectorAll('.nav-item');
+const views = document.querySelectorAll('.view');
+const titles = {
+  dashboard: ["Dashboard","Ringkasan integrasi pendapatan SIM RS ke BLUD"],
+  mapping: ["Mapping Layanan RS & RBA","Pemetaan kode layanan rumah sakit ke rekening pendapatan RBA"],
+  kas: ["Data Kas SIM RS","Transaksi kas yang tercatat dari SIM RS, siap disinkronkan"],
+  rekap: ["Rekap Transaksi Penerimaan","Rekap harian sebelum dikirim ke SIPKD BLUD"],
+  berita: ["Berita Acara Penutupan Kas Harian","Dokumen penutupan kas harian dan tanda tangan pengesahan"],
+  log: ["Log API & Audit","Jejak permintaan API dan status pengiriman ke SIPKD"],
+  pengaturan: ["Pengaturan","Konfigurasi endpoint SIPKD dan jadwal sinkronisasi otomatis"],
+};
+function goView(key){
+  navItems.forEach(b => b.classList.toggle('active', b.dataset.view === key));
+  views.forEach(v => v.classList.toggle('active', v.id === 'view-' + key));
+  document.getElementById('pageTitle').textContent = titles[key][0];
+  document.getElementById('pageSub').textContent = titles[key][1];
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+navItems.forEach(btn => btn.addEventListener('click', () => goView(btn.dataset.view)));
+
+// mobile menu
+const menuBtn = document.getElementById('menuBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+menuBtn.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('show'); });
+overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
+
+// subtabs on Rekap detail
+document.querySelectorAll('.subtab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.subtab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-bukti').style.display = tab.dataset.tab === 'bukti' ? 'block' : 'none';
+    document.getElementById('tab-rekening').style.display = tab.dataset.tab === 'rekening' ? 'block' : 'none';
+  });
+});
+
+// rekap row select -> update detail header (mock)
+document.querySelectorAll('.rekap-row').forEach(row => {
+  row.addEventListener('click', (e) => {
+    if (e.target.closest('button')) return;
+    document.querySelectorAll('.rekap-row').forEach(r => r.classList.remove('active'));
+    row.classList.add('active');
+    document.getElementById('rekapDetailId').textContent = row.dataset.id;
+  });
+});
+
+// modal
+const modal = document.getElementById('modalBackdrop');
+document.getElementById('btnGenerateRekap').addEventListener('click', () => { modal.style.display='flex'; });
+function closeModal(){ modal.style.display='none'; }
+modal.addEventListener('click', (e) => { if(e.target === modal) closeModal(); });
+</script>
+</body>
+</html>

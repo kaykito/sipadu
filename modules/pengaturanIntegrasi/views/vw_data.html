@@ -1,0 +1,147 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <h5 class="mb-0">Koneksi API SIM RS (sumber Data Kas)</h5>
+      <button type="button" class="btn btn-sm btn-outline-primary" id="btnTesSimrs"><i class="bx bx-plug me-1"></i> Tes Koneksi</button>
+    </div>
+    <div class="card-body">
+      <dl class="row mb-0">
+        <dt class="col-sm-3">URL Base API</dt><dd class="col-sm-9"><code><%= simrs.baseUrl || '-' %></code></dd>
+        <dt class="col-sm-3">ConsId</dt><dd class="col-sm-9"><%= simrs.consId || '-' %></dd>
+        <dt class="col-sm-3">SecretKey</dt><dd class="col-sm-9"><%= simrs.adaSecret ? 'Tersimpan' : 'Belum diisi' %></dd>
+      </dl>
+      <div class="form-text">Diatur lewat <code>SIMRS_API_BASE_URL</code>, <code>SIMRS_CONS_ID</code>, <code>SIMRS_SECRET_KEY</code> di file <code>.env</code> server. API hanya bisa diakses dari jaringan/VPN yang di-whitelist SIM RS.</div>
+    </div>
+  </div>
+
+  <form id="formPengaturan" onsubmit="return false">
+    <div class="card mb-4">
+      <div class="card-header"><h5 class="mb-0">1. Konfigurasi Endpoint SIPKD BLUD</h5></div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="apiBaseUrl" class="form-label">URL Base API SIPKD <span class="text-danger">*</span></label>
+          <input type="url" class="form-control" id="apiBaseUrl" name="apiBaseUrl" value="<%= pengaturan.apiBaseUrl %>" required <%= akses.edit ? '' : 'disabled' %>>
+        </div>
+        <div>
+          <label for="apiToken" class="form-label">Bearer Token / API Key</label>
+          <input type="password" class="form-control" id="apiToken" name="apiToken" autocomplete="new-password"
+            placeholder="<%= adaToken ? 'Token tersimpan — kosongkan bila tidak diganti' : 'Masukkan token' %>" <%= akses.edit ? '' : 'disabled' %>>
+          <div class="form-text">Token di-generate dari admin SIPKD Provinsi.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header"><h5 class="mb-0">2. Rekening BLUD Default</h5></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="bankBlud" class="form-label">Bank Tujuan</label>
+            <input type="text" class="form-control" id="bankBlud" name="bankBlud" maxlength="100" value="<%= pengaturan.bankBlud || '' %>" <%= akses.edit ? '' : 'disabled' %>>
+          </div>
+          <div class="col-md-4">
+            <label for="noRekBlud" class="form-label">No. Rekening BLUD</label>
+            <input type="text" class="form-control" id="noRekBlud" name="noRekBlud" maxlength="50" value="<%= pengaturan.noRekBlud || '' %>" <%= akses.edit ? '' : 'disabled' %>>
+          </div>
+          <div class="col-md-4">
+            <label for="nmRekBlud" class="form-label">Nama Rekening</label>
+            <input type="text" class="form-control" id="nmRekBlud" name="nmRekBlud" maxlength="100" value="<%= pengaturan.nmRekBlud || '' %>" <%= akses.edit ? '' : 'disabled' %>>
+          </div>
+        </div>
+        <div class="form-text">Dipakai sebagai isian awal saat membuat rekap penerimaan.</div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header"><h5 class="mb-0">3. Pengaturan Sinkronisasi Otomatis (Scheduler)</h5></div>
+      <div class="card-body">
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="autoSync" name="autoSync" value="1" <%= pengaturan.autoSync ? 'checked' : '' %> <%= akses.edit ? '' : 'disabled' %>>
+          <label class="form-check-label" for="autoSync">Aktifkan Auto-Sync Harian</label>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <label for="jamSync" class="form-label">Waktu Eksekusi (WITA) <span class="text-danger">*</span></label>
+            <input type="time" class="form-control" id="jamSync" name="jamSync" value="<%= pengaturan.jamSync %>" required <%= akses.edit ? '' : 'disabled' %>>
+          </div>
+        </div>
+        <div class="form-text">Sistem akan otomatis me-rekap dan mengirim data pada jam tersebut. Sesuaikan dengan jadwal tutup kas harian.</div>
+      </div>
+    </div>
+
+    <% if (akses.edit) { %>
+    <div class="d-flex justify-content-end gap-2">
+      <button type="reset" class="btn btn-outline-secondary">Batal</button>
+      <button type="submit" class="btn btn-primary"><i class="bx bx-save me-1"></i> Simpan Konfigurasi</button>
+    </div>
+    <% } %>
+  </form>
+
+  <% if (bolehReset) { %>
+  <div class="card border border-danger mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h5 class="mb-0 text-danger"><i class="bx bx-error me-1"></i> Zona Bahaya &mdash; Reset Data</h5>
+        <small class="text-muted">Hanya tampil saat <code>NODE_ENV=development</code> dan login sebagai admin.</small>
+      </div>
+      <button type="button" class="btn btn-danger" id="btnResetData"><i class="bx bx-reset me-1"></i> Reset Data</button>
+    </div>
+    <div class="card-body">
+      <ul class="mb-0 small">
+        <li><strong>Dihapus:</strong> data kas, rekap, berita acara, log API, mapping RBA &amp; layanan, data Contoh, semua user selain <code>admin</code> beserta perangkatnya, kelompok selain kelompok admin.</li>
+        <li><strong>Dipertahankan:</strong> user <code>admin</code> (password tidak berubah), kelompok admin, menu &amp; hak akses admin, pengaturan di halaman ini.</li>
+        <li>Setelah dihapus, semua seeder dijalankan ulang sehingga data awal (menu &amp; hak akses) lengkap kembali. Data kas tarik ulang lewat <em>Data Kas SIM RS &rarr; Sinkronisasi Data</em>.</li>
+      </ul>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+<script>
+  (function () {
+    $('#btnTesSimrs').off('click').on('click', function () {
+      var btn = $(this).prop('disabled', true);
+      $.get('/pengaturanIntegrasi/getTesKoneksiSimrs')
+        .done(function (res) { Swal.fire(res.success ? 'Berhasil' : 'Gagal', res.message, res.success ? 'success' : 'error'); })
+        .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); })
+        .always(function () { btn.prop('disabled', false); });
+    });
+
+    $('#btnResetData').off('click').on('click', function () {
+      Swal.fire({
+        title: 'Reset semua data?',
+        html: 'Semua data selain user admin, menu, dan pengaturan akan dihapus lalu diisi ulang dari seeder.<br>Ketik <b>RESET</b> untuk melanjutkan.',
+        icon: 'warning',
+        input: 'text',
+        inputPlaceholder: 'RESET',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Reset Data',
+        cancelButtonText: 'Batal',
+        showLoaderOnConfirm: true,
+        preConfirm: function (value) {
+          if (value !== 'RESET') {
+            Swal.showValidationMessage('Ketik RESET (huruf besar) untuk konfirmasi');
+            return false;
+          }
+          return $.post('/pengaturanIntegrasi/deleteSemuaData', { konfirmasi: value })
+            .then(function (res) { return res; }, function () { return { success: false, message: 'Terjadi kesalahan sistem' }; });
+        },
+        allowOutsideClick: function () { return !Swal.isLoading(); }
+      }).then(function (result) {
+        if (!result.isConfirmed || !result.value) return;
+        var res = result.value;
+        Swal.fire(res.success ? 'Berhasil' : 'Gagal', res.message, res.success ? 'success' : 'error');
+      });
+    });
+
+    $('#formPengaturan').off('submit').on('submit', function () {
+      $.post('/pengaturanIntegrasi/save', $(this).serialize())
+        .done(function (res) {
+          Swal.fire(res.success ? 'Berhasil' : 'Gagal', res.message, res.success ? 'success' : 'error');
+          if (res.success) $('#apiToken').val('').attr('placeholder', 'Token tersimpan — kosongkan bila tidak diganti');
+        })
+        .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); });
+    });
+  })();
+</script>

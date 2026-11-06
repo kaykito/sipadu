@@ -1,197 +1,294 @@
-<% const cloudflareTurnstileSiteKey = (typeof turnstileSiteKey !== 'undefined' && turnstileSiteKey) || ''; %>
+<%
+  const cloudflareTurnstileSiteKey = (typeof turnstileSiteKey !== 'undefined' && turnstileSiteKey) || '';
+  const b = (typeof branding !== 'undefined' && branding) || {};
+  const appName = typeof nameapp !== 'undefined' ? nameapp : '';
+%>
 <!DOCTYPE html>
-
-<html lang="id" class="light-style layout-wide customizer-hide" dir="ltr" data-theme="theme-default" data-assets-path="/assets/" data-template="vertical-menu-template">
+<html lang="id" class="light-style" dir="ltr" data-theme="theme-default">
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Login | <%= [b.judul, b.judulAksen].filter(Boolean).join(' ') || appName %></title>
+        <link rel="icon" type="image/png" href="/assets/img/login/logo-rs.png" />
 
-        <title>Login | <%= typeof nameapp !== 'undefined' ? nameapp : 'Express MSSQL Boilerplate' %></title>
-
-        <meta name="description" content="" />
-        <!-- Favicon -->
-        <link rel="icon" type="image/png" href="/logo1.png" />
-
-        <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
-
-        <!-- Icons -->
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="/assets/vendor/fonts/boxicons.css" />
-        <link rel="stylesheet" href="/assets/vendor/fonts/fontawesome.css" />
-        <link rel="stylesheet" href="/assets/vendor/fonts/flag-icons.css" />
+        <link rel="stylesheet" href="/assets/vendor/css/rtl/core.css" />
+        <link rel="stylesheet" href="/assets/vendor/css/rtl/theme-default.css" />
 
-        <!-- Core CSS -->
-        <link rel="stylesheet" href="/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
-        <link rel="stylesheet" href="/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
-        <link rel="stylesheet" href="/assets/css/demo.css" />
-        <link rel="stylesheet" href="/assets/css/custom.css?v=<%= Date.now() %>" />
-
-        <!-- Vendors CSS -->
-        <link rel="stylesheet" href="/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-        <link rel="stylesheet" href="/assets/vendor/libs/typeahead-js/typeahead.css" />
-        <!-- Vendor -->
-        <link rel="stylesheet" href="/assets/vendor/libs/@form-validation/umd/styles/index.min.css" />
-
-        <!-- Page CSS -->
-        <!-- Page -->
-        <link rel="stylesheet" href="/assets/vendor/css/pages/page-auth.css" />
-
-        <!-- Helpers -->
-        <script src="/assets/vendor/js/helpers.js"></script>
-        <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-        <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
-        <script src="/assets/vendor/js/template-customizer.js"></script>
-        <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-        <script src="/assets/js/config.js"></script>
         <% if (cloudflareTurnstileSiteKey) { %>
         <script>
             window.__turnstileVerified = false;
             window.onLoginTurnstileSuccess = function () {
                 window.__turnstileVerified = true;
-                if (typeof window.updateLoginButtonState === 'function') {
-                    window.updateLoginButtonState();
-                }
+                if (typeof window.updateLoginButtonState === 'function') window.updateLoginButtonState();
             };
             window.onLoginTurnstileReset = function () {
                 window.__turnstileVerified = false;
-                if (typeof window.updateLoginButtonState === 'function') {
-                    window.updateLoginButtonState();
-                }
+                if (typeof window.updateLoginButtonState === 'function') window.updateLoginButtonState();
             };
         </script>
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
         <% } %>
-        <style>
-            .fixed-bottom {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 1030;
-}
 
-.authentication-wrapper {
-  min-height: calc(100vh - 60px); /* Adjust 60px based on footer height */
-}
+        <style>
+            :root {
+                --lg-navy-950: #0a2147;
+                --lg-navy-800: #123a73;
+                --lg-navy-700: #1b4a8a;
+                --lg-teal: #1c8c7a;
+                --lg-mint: #d4f0e3;
+                --lg-blue: #3878d8;
+                --lg-ink: #1d2433;
+                --lg-muted: #6b7690;
+                --lg-line: #d6dbe6;
+            }
+            html, body { height: 100%; }
+            body {
+                margin: 0;
+                font-family: 'IBM Plex Sans', system-ui, sans-serif;
+                color: var(--lg-ink);
+                background: var(--lg-navy-950);
+            }
+            h2, h4, .btn, .form-control, .form-label, .modal-title { font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+            .login-shell {
+                display: grid;
+                grid-template-columns: minmax(0, 57fr) minmax(0, 43fr);
+                min-height: 100vh;
+            }
+
+            /* ---------- Panel kiri: identitas & ilustrasi ---------- */
+            .login-brand {
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                padding: 40px 56px 28px;
+                background:
+                    radial-gradient(120% 90% at 100% 100%, #b9e8d2 0%, rgba(185, 232, 210, 0) 60%),
+                    linear-gradient(160deg, #ffffff 0%, #ffffff 35%, var(--lg-mint) 100%);
+            }
+            .brand-header {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding-bottom: 18px;
+                border-bottom: 1.5px solid #2b3550;
+                max-width: 560px;
+            }
+            .brand-header img { width: 62px; height: 62px; object-fit: contain; }
+            .brand-instansi { font-size: 1.32rem; line-height: 1.25; font-weight: 500; color: var(--lg-navy-950); letter-spacing: .01em; }
+            .brand-title {
+                margin: 22px 0 4px;
+                font-size: clamp(2.6rem, 4.6vw, 4.3rem);
+                line-height: 1;
+                letter-spacing: .02em;
+                color: var(--lg-navy-950);
+                font-weight: 300;
+            }
+            .brand-title strong { color: var(--lg-teal); font-weight: 700; margin-left: .2em; letter-spacing: .04em; }
+            .brand-tagline { font-size: .92rem; letter-spacing: .04em; text-transform: uppercase; color: var(--lg-navy-950); font-weight: 500; }
+            .brand-illustration {
+                flex: 1;
+                display: flex;
+                align-items: flex-end;
+                margin: 24px -56px 0;
+                min-height: 0;
+            }
+            .brand-illustration img {
+                width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+                object-position: left bottom;
+                -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%);
+                mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%);
+            }
+            .brand-footer { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: .88rem; color: var(--lg-navy-950); }
+            .brand-footer i { font-size: 1.15rem; color: var(--lg-navy-800); }
+
+            /* ---------- Panel kanan: form ---------- */
+            .login-panel {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 40px 24px 80px;
+                background:
+                    radial-gradient(80% 60% at 85% 10%, rgba(80, 140, 230, .28), transparent 70%),
+                    linear-gradient(160deg, var(--lg-navy-800) 0%, var(--lg-navy-950) 75%);
+                overflow: hidden;
+            }
+            .login-panel::before {
+                /* motif garis tipis bergaya denah gedung */
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-image:
+                    linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+                background-size: 46px 46px;
+                -webkit-mask-image: radial-gradient(70% 70% at 70% 40%, #000, transparent 75%);
+                mask-image: radial-gradient(70% 70% at 70% 40%, #000, transparent 75%);
+                pointer-events: none;
+            }
+            .login-card {
+                position: relative;
+                width: 100%;
+                max-width: 440px;
+                background: #fff;
+                border-radius: 14px;
+                padding: 32px 32px 18px;
+                box-shadow: 0 24px 60px rgba(4, 16, 40, .45);
+            }
+            .btn-bantuan {
+                position: fixed; right: 22px; bottom: 20px; z-index: 5;
+                display: inline-flex; align-items: center; gap: 6px;
+                padding: 9px 18px; border-radius: 999px;
+                background: var(--lg-navy-700); color: #fff; border: 1px solid rgba(255, 255, 255, .25);
+                font-size: .92rem; box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
+            }
+            .btn-bantuan:hover { background: var(--lg-blue); }
+
+            /* ---------- Responsif ---------- */
+            @media (max-width: 991.98px) {
+                .login-shell { grid-template-columns: minmax(0, 1fr); }
+                .brand-header { gap: 10px; }
+                .login-brand { padding: 24px 20px 16px; }
+                .brand-header img { width: 48px; height: 48px; }
+                .brand-instansi { font-size: 1rem; }
+                .brand-title { margin-top: 14px; }
+                .brand-tagline { font-size: .78rem; }
+                .brand-illustration, .brand-footer { display: none; }
+                .login-panel { padding: 28px 16px 90px; align-items: flex-start; }
+                .login-card { padding: 26px 20px 20px; }
+            }
         </style>
     </head>
 
     <body>
-        <!-- Content -->
+        <div class="login-shell">
+            <!-- Identitas instansi & aplikasi -->
+            <section class="login-brand">
+                <div class="brand-header">
+                    <img src="/assets/img/login/logo-pemprov.png" alt="Logo <%= b.instansi1 %>" />
+                    <img src="/assets/img/login/logo-rs.png" alt="Logo <%= b.instansi2 %>" />
+                    <div class="brand-instansi"><%= b.instansi1 %><br /><%= b.instansi2 %></div>
+                </div>
+                <h2 class="brand-title"><%= b.judul %><% if (b.judulAksen) { %><strong><%= b.judulAksen %></strong><% } %></h2>
+                <div class="brand-tagline"><%= b.tagline %></div>
+                <div class="brand-illustration">
+                    <img src="/assets/img/login/ilustrasi.jpg" alt="" />
+                </div>
+                <% if (b.pengembang) { %>
+                <div class="brand-footer"><i class="bx bx-code-curly"></i> Dikembangkan oleh <%= b.pengembang %></div>
+                <% } %>
+            </section>
 
-        <div class="authentication-wrapper authentication-cover">
-            <div class="authentication-inner row m-0">
-                <!-- /Left Text -->
-                <div class="d-none d-lg-flex col-lg-7 col-xl-8 align-items-center p-0" style="position: relative">
-                    <div class="w-100 h-100 position-relative d-flex justify-content-center align-items-center">
-                        <img src="/background.png" alt="Auth Cover Bg color" style="width: 70%; height: 100vh; object-fit: cover" />
+            <!-- Form login -->
+            <section class="login-panel">
+                <div class="login-card">
+                    <div class="text-center mb-4">
+                        <h4 class="mb-0"><%= appName %></h4>
+                    </div>
+                    <p class="mb-4">Silakan masuk ke akun Anda untuk mulai menggunakan aplikasi.</p>
+
+                    <% if (typeof error_msg !== 'undefined' && error_msg) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bx bx-error-circle me-1"></i>
+                        <%= error_msg %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <% } %>
+                    <% if (typeof success_msg !== 'undefined' && success_msg) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bx bx-check-circle me-1"></i>
+                        <%= success_msg %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <% } %>
+                    <% if (typeof msg !== 'undefined' && msg) { %>
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="bx bx-info-circle me-1"></i>
+                        <%= msg %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <% } %>
+
+                    <form id="formAuthentication" class="mb-3" action="/login/process" method="POST">
+                        <div class="mb-3">
+                            <label for="userID" class="form-label">User ID</label>
+                            <input type="text" class="form-control" id="userID" name="userID" placeholder="Masukan User ID Anda" autofocus />
+                        </div>
+                        <div class="mb-3 form-password-toggle">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label" for="PWD">Password</label>
+                            </div>
+                            <div class="input-group input-group-merge">
+                                <input type="password" id="PWD" class="form-control" name="PWD" placeholder="************" aria-describedby="password" />
+                                <span class="input-group-text cursor-pointer" id="btnTogglePwd"><i class="bx bx-hide"></i></span>
+                            </div>
+                        </div>
+                        <% if (cloudflareTurnstileSiteKey) { %>
+                        <div class="mb-3">
+                            <div
+                                class="cf-turnstile"
+                                data-sitekey="<%= cloudflareTurnstileSiteKey %>"
+                                data-theme="light"
+                                data-callback="onLoginTurnstileSuccess"
+                                data-expired-callback="onLoginTurnstileReset"
+                                data-error-callback="onLoginTurnstileReset"
+                            ></div>
+                        </div>
+                        <% } %>
+                        <button id="btnLoginSubmit" class="btn btn-primary d-grid w-100" type="submit" <%= cloudflareTurnstileSiteKey ? 'disabled' : '' %>>Masuk</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <button type="button" class="btn-bantuan" data-bs-toggle="modal" data-bs-target="#bantuanModal">
+            <i class="bx bx-help-circle"></i> Bantuan
+        </button>
+
+        <!-- Modal bantuan / lupa kata sandi -->
+        <div class="modal fade" id="bantuanModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Bantuan</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">Lupa kata sandi atau belum punya akun? Kata sandi hanya bisa diatur ulang oleh administrator aplikasi.</p>
+                        <% if (b.kontakAdmin) { %>
+                        <p class="mb-0"><i class="bx bx-phone me-1"></i> Hubungi admin: <strong><%= b.kontakAdmin %></strong></p>
+                        <% } else { %>
+                        <p class="mb-0 text-muted">Silakan hubungi bagian IT / administrator rumah sakit.</p>
+                        <% } %>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Mengerti</button>
                     </div>
                 </div>
-                <!-- /Left Text -->
-
-                <!-- Login -->
-                <div class="d-flex col-12 col-lg-5 col-xl-4 align-items-center authentication-bg p-sm-5 p-4">
-                    <div class="w-px-400 mx-auto">
-                        <!-- Logo -->
-                        <div class="text-center mb-4">
-                            <img src="/logo.png" alt="" width="100" height="100" class="mb-3" />
-                            <h4 class="mb-0"><%= typeof nameapp !== 'undefined' ? nameapp : '' %></h4>
-                        </div>
-                        <!-- /Logo -->
-                        <p class="mb-4">Silakan masuk ke akun Anda untuk mulai menggunakan aplikasi.</p>
-
-                        <% if (typeof error_msg !== 'undefined' && error_msg) { %>
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="bx bx-error-circle me-1"></i>
-                            <%= error_msg %>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        <% } %>
-                        <% if (typeof success_msg !== 'undefined' && success_msg) { %>
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="bx bx-check-circle me-1"></i>
-                            <%= success_msg %>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        <% } %>
-                        <% if (typeof msg !== 'undefined' && msg) { %>
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                            <i class="bx bx-info-circle me-1"></i>
-                            <%= msg %>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        <% } %>
-
-                        <form id="formAuthentication" class="mb-3" action="/login/process" method="POST">
-                            <div class="mb-3">
-                                <label for="userID" class="form-label">User ID</label>
-                                <input type="text" class="form-control" id="userID" name="userID" placeholder="Masukan User ID Anda" autofocus />
-                            </div>
-                            <div class="mb-3 form-password-toggle">
-                                <div class="d-flex justify-content-between">
-                                    <label class="form-label" for="PWD">Password</label>
-                                </div>
-                                <div class="input-group input-group-merge">
-                                    <input type="password" id="PWD" class="form-control" name="PWD" placeholder="************" aria-describedby="password" />
-                                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                                </div>
-                            </div>
-                            <% if (cloudflareTurnstileSiteKey) { %>
-                            <div class="mb-3">
-                                <div
-                                    class="cf-turnstile"
-                                    data-sitekey="<%= cloudflareTurnstileSiteKey %>"
-                                    data-theme="light"
-                                    data-callback="onLoginTurnstileSuccess"
-                                    data-expired-callback="onLoginTurnstileReset"
-                                    data-error-callback="onLoginTurnstileReset"
-                                ></div>
-                            </div>
-                            <% } %>
-                            <button id="btnLoginSubmit" class="btn btn-primary d-grid w-100" type="submit" <%= cloudflareTurnstileSiteKey ? 'disabled' : '' %>>Masuk</button>
-                        </form>
-                    </div>
-                </div>
-                <!-- /Login -->
             </div>
         </div>
-        <footer class="content-footer footer bg-footer-theme fixed-bottom">
-        <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
-            <div class="mb-2 mb-md-0">
-            © <script>document.write(new Date().getFullYear());</script>
-            <span class="fw-bolder"><%= typeof nameapp !== 'undefined' ? nameapp : '' %></span>
-            </div>
-        </div>
-        </footer>
 
-        <!-- / Content -->
-
-        <!-- Core JS -->
-        <!-- build:js assets/vendor/js/core.js -->
-
-        <script src="/assets/vendor/libs/jquery/jquery.js"></script>
         <script src="/assets/vendor/libs/popper/popper.js"></script>
         <script src="/assets/vendor/js/bootstrap.js"></script>
-        <script src="/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-        <script src="/assets/vendor/libs/hammer/hammer.js"></script>
-        <script src="/assets/vendor/libs/i18n/i18n.js"></script>
-        <script src="/assets/vendor/libs/typeahead-js/typeahead.js"></script>
-        <script src="/assets/vendor/js/menu.js"></script>
-
-        <!-- endbuild -->
-
-        <!-- Vendors JS -->
-        <script src="/assets/vendor/libs/@form-validation/umd/bundle/popular.min.js"></script>
-        <script src="/assets/vendor/libs/@form-validation/umd/plugin-bootstrap5/index.min.js"></script>
-        <script src="/assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js"></script>
-
-        <!-- Main JS -->
-        <script src="/assets/js/main.js"></script>
-
-        <!-- Page JS -->
-        <script src="/assets/js/pages-auth.js"></script>
+        <script>
+            (function () {
+                var pwd = document.getElementById('PWD');
+                var toggle = document.getElementById('btnTogglePwd');
+                toggle.addEventListener('click', function () {
+                    var show = pwd.type === 'password';
+                    pwd.type = show ? 'text' : 'password';
+                    toggle.innerHTML = '<i class="bx ' + (show ? 'bx-show' : 'bx-hide') + '"></i>';
+                    toggle.setAttribute('aria-label', show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
+                });
+            })();
+        </script>
         <% if (cloudflareTurnstileSiteKey) { %>
         <script>
             (function enforceTurnstileBeforeLogin() {

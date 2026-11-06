@@ -1,0 +1,323 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0"><%= subtitle %></h5>
+            <% if (akses.edit) { %>
+            <button type="button" class="btn btn-primary" id="btnSyncKas">
+                <i class="bx bx-refresh me-1"></i>
+                Sinkronisasi Data
+            </button>
+            <% } %>
+        </div>
+        <div class="card-body">
+            <div class="row g-2 mb-3">
+                <div class="col-sm-4 col-md-3">
+                    <select class="form-select form-select-md" id="filterJenis">
+                        <option value="">Semua jenis</option>
+                        <option value="TBP">TBP</option>
+                        <option value="STS">STS</option>
+                    </select>
+                </div>
+                <div class="col-sm-4 col-md-3">
+                    <div class="input-group input-group-md">
+                        <span class="input-group-text">Dari</span>
+                        <input type="datetime-local" class="form-control" id="filterDari" title="Tanggal &amp; jam awal (kosongkan untuk tanpa batas)" />
+                    </div>
+                </div>
+                <div class="col-sm-4 col-md-3">
+                    <div class="input-group input-group-md">
+                        <span class="input-group-text">Sampai</span>
+                        <input type="datetime-local" class="form-control" id="filterSampai" title="Tanggal &amp; jam akhir (kosongkan untuk tanpa batas)" />
+                    </div>
+                </div>
+                <div class="col-md-3 ms-md-auto">
+                    <div class="border rounded px-3 py-1 text-md-end">
+                        <small class="text-muted">
+                            Grand Total
+                            <span id="kasGrandInfo"></span>
+                        </small>
+                        <div class="fw-bold fs-5" id="kasGrandTotal">-</div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive text-nowrap">
+                <table class="table table-sm table-bordered w-100" id="kasTable">
+                    <thead>
+                        <tr>
+                            <th class="col-no">No</th>
+                            <th class="col-tgljam">Tanggal</th>
+                            <th class="col-kode">No. Bukti</th>
+                            <th class="col-teks">Penyetor</th>
+                            <th class="col-sedang">Bank / Rek. BLUD</th>
+                            <th class="col-status">Jenis</th>
+                            <th class="col-nominal text-end">Total</th>
+                            <th class="col-status">Status</th>
+                            <th class="col-aksi">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" id="kasDetailCard">
+        <div class="card-header">
+            <h5 class="mb-0">Rincian Data Kas SIM RS</h5>
+            <small class="text-muted" id="kasDetailInfo">Pilih salah satu nomor bukti untuk melihat rinciannya.</small>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive text-nowrap">
+                <table class="table table-bordered w-100" id="kasDetailTable">
+                    <thead>
+                        <tr>
+                            <th class="col-no">No</th>
+                            <th class="col-kode">Kode Rekening</th>
+                            <th class="col-teks">Nama Rekening</th>
+                            <th class="col-teks">Uraian Layanan</th>
+                            <th class="col-nominal text-end">Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4">Total</th>
+                            <th class="text-end" id="kasDetailTotal">-</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sinkronisasi dari API SIM RS -->
+<div class="modal fade" id="syncKasModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sinkronisasi Data Kas dari SIM RS</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <form id="formSyncKas" onsubmit="return false;">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label for="syncDari" class="form-label">
+                                Dari tanggal
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" class="form-control" id="syncDari" name="dari" required />
+                        </div>
+                        <div class="col-6">
+                            <label for="syncSampai" class="form-label">
+                                Sampai tanggal
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" class="form-control" id="syncSampai" name="sampai" required />
+                        </div>
+                    </div>
+                    <div class="form-text mt-2">Maksimal <%= maksHariSinkron %> hari. Bukti baru ditambahkan dan bukti lama diperbarui; bukti yang sudah masuk rekap tidak diubah.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary" id="btnSyncKasSubmit">
+                        <i class="bx bx-refresh me-1"></i>
+                        Tarik Data
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        function escapeHtml(value) {
+            return $('<div>')
+                .text(value == null ? '' : value)
+                .html();
+        }
+        function rupiah(v) {
+            return 'Rp ' + Number(v || 0).toLocaleString('id-ID');
+        }
+        function tglJam(v) {
+            var d = new Date(v);
+            return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        }
+        var statusBadge = {
+            success: '<span class="badge bg-label-success">Tersinkron</span>',
+            pending: '<span class="badge bg-label-warning">Pending</span>',
+            failed: '<span class="badge bg-label-danger">Gagal</span>',
+        };
+
+        if ($.fn.DataTable.isDataTable('#kasTable')) {
+            $('#kasTable').DataTable().destroy();
+        }
+
+        var bahasa = {
+            processing: 'Sedang memproses...',
+            lengthMenu: 'Tampilkan _MENU_ entri',
+            zeroRecords: 'Tidak ditemukan data yang sesuai',
+            info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ entri',
+            infoEmpty: 'Menampilkan 0 sampai 0 dari 0 entri',
+            infoFiltered: '(disaring dari _MAX_ entri keseluruhan)',
+            search: 'Cari:',
+            paginate: { first: 'Pertama', previous: 'Sebelumnya', next: 'Selanjutnya', last: 'Terakhir' },
+        };
+
+        var table = $('#kasTable').DataTable({
+            serverSide: true,
+            processing: true,
+            ajax: {
+                url: '/kasSimrs/data',
+                data: function (d) {
+                    d.jenis = $('#filterJenis').val();
+                    d.dari = $('#filterDari').val();
+                    d.sampai = $('#filterSampai').val();
+                },
+                dataSrc: function (json) {
+                    $('#kasGrandTotal').text(rupiah(json.grandTotal));
+                    $('#kasGrandInfo').text('(' + Number(json.recordsFiltered || 0).toLocaleString('id-ID') + ' bukti)');
+                    return json.data;
+                },
+            },
+            columns: [
+                {
+                    data: null,
+                    orderable: false,
+                    render: function (data, type, row, meta) {
+                        return meta.settings._iDisplayStart + meta.row + 1;
+                    },
+                },
+                { data: 'tanggal', render: tglJam },
+                {
+                    data: 'noBukti',
+                    render: function (v) {
+                        return '<code>' + escapeHtml(v) + '</code>';
+                    },
+                },
+                { data: 'penyetor', render: escapeHtml },
+                {
+                    data: null,
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '<span class="text-muted">' + escapeHtml(row.bank) + ' &middot; ' + escapeHtml(row.noRek) + '</span>';
+                    },
+                },
+                { data: 'jenis', render: escapeHtml },
+                { data: 'total', className: 'text-end fw-semibold', render: rupiah },
+                {
+                    data: 'status',
+                    render: function (v) {
+                        return statusBadge[v] || escapeHtml(v);
+                    },
+                },
+                {
+                    data: null,
+                    orderable: false,
+                    className: 'text-center',
+                    width: '1%',
+                    render: function (data, type, row) {
+                        return '<button class="btn btn-sm btn-info btn-detail" data-id="' + escapeHtml(row.noBukti) + '" title="Rincian"><i class="bx bx-show"></i></button>';
+                    },
+                },
+            ],
+            order: [[1, 'asc']],
+            language: $.extend({}, bahasa, { searchPlaceholder: 'No. bukti / penyetor' }),
+        });
+
+        if ($.fn.DataTable.isDataTable('#kasDetailTable')) {
+            $('#kasDetailTable').DataTable().destroy();
+        }
+
+        // Rincian satu bukti: data sudah lengkap dari /kasSimrs/detail, jadi paging/cari di sisi klien
+        var detailTable = $('#kasDetailTable').DataTable({
+            data: [],
+            columns: [
+                { data: null, orderable: false, searchable: false, width: '1%', className: 'text-center' },
+                {
+                    data: 'kdRek',
+                    render: function (v) {
+                        return '<code>' + escapeHtml(v) + '</code>';
+                    },
+                },
+                { data: 'rekening', render: escapeHtml },
+                { data: 'uraian', render: escapeHtml },
+                {
+                    data: 'nilai',
+                    className: 'text-end',
+                    render: function (v, type) {
+                        return type === 'display' ? rupiah(v) : Number(v || 0);
+                    },
+                },
+            ],
+            order: [[1, 'asc']],
+            language: $.extend({}, bahasa, {
+                emptyTable: 'Pilih salah satu nomor bukti untuk melihat rinciannya',
+                searchPlaceholder: 'Rekening / uraian',
+            }),
+        });
+        detailTable.on('draw.dt', function () {
+            detailTable
+                .column(0, { search: 'applied', order: 'applied' })
+                .nodes()
+                .each(function (cell, i) {
+                    cell.innerHTML = i + 1;
+                });
+        });
+
+        $('#filterJenis, #filterDari, #filterSampai')
+            .off('change')
+            .on('change', function () {
+                table.ajax.reload();
+            });
+
+        $('#kasTable')
+            .off('click', '.btn-detail')
+            .on('click', '.btn-detail', function () {
+                $.get('/kasSimrs/detail/' + encodeURIComponent($(this).data('id')), function (res) {
+                    if (!res.success) return Swal.fire('Gagal', res.message, 'error');
+                    var k = res.data;
+                    $('#kasDetailInfo').html('Nomor Bukti <code>' + escapeHtml(k.noBukti) + '</code> &middot; ' + escapeHtml(k.penyetor) + ' &middot; ' + escapeHtml(tglJam(k.tanggal)));
+                    detailTable.clear().rows.add(k.rincian).draw();
+                    $('#kasDetailTotal').text(rupiah(k.total));
+                    document.getElementById('kasDetailCard').scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+
+        function hariIni() {
+            var d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        $('#btnSyncKas')
+            .off('click')
+            .on('click', function () {
+                var tgl = ($('#filterDari').val() || '').slice(0, 10) || hariIni();
+                $('#syncDari').val(tgl);
+                $('#syncSampai').val(tgl);
+                $('#syncKasModal').modal('show');
+            });
+
+        $('#formSyncKas')
+            .off('submit')
+            .on('submit', function () {
+                var btn = $('#btnSyncKasSubmit').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Menarik data...');
+                $.post('/kasSimrs/updateSinkronisasi', $(this).serialize())
+                    .done(function (res) {
+                        if (res.success) {
+                            $('#syncKasModal').modal('hide');
+                            table.ajax.reload(null, false);
+                        }
+                        Swal.fire(res.success ? 'Berhasil' : 'Gagal', res.message, res.success ? 'success' : 'error');
+                    })
+                    .fail(function () {
+                        Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+                    })
+                    .always(function () {
+                        btn.prop('disabled', false).html('<i class="bx bx-refresh me-1"></i> Tarik Data');
+                    });
+            });
+    })();
+</script>

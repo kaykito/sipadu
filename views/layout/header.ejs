@@ -57,6 +57,18 @@
         <script src="/assets/vendor/libs/select2/select2.js"></script>
         <script src="/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
         <script src="/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+        <script>
+            // Lebar kolom DataTables diatur lewat class col-* di <th> (lihat custom.css), bukan hitung otomatis.
+            // Class col-* di <th> ikut disalin ke <td> kolom yang sama supaya aturan wrap/rata juga berlaku di isi.
+            $.extend(true, $.fn.dataTable.defaults, { autoWidth: false });
+            $(document).on('preInit.dt', function (e, settings) {
+                if (e.namespace !== 'dt') return;
+                settings.aoColumns.forEach(function (col) {
+                    var cls = (col.nTh && col.nTh.className.match(/\bcol-[\w-]+/g)) || [];
+                    if (cls.length) col.sClass = (col.sClass + ' ' + cls.join(' ')).trim();
+                });
+            });
+        </script>
         <script src="/assets/vendor/libs/apex-charts/apexcharts.js"></script>
         
         <!-- Custom Styles -->

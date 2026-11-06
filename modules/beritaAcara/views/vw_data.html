@@ -1,0 +1,217 @@
+<div class="flex-grow-1 container-p-y container-fluid">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <h5 class="mb-0"><%= title %></h5>
+      <% if (akses.add) { %>
+      <button type="button" class="btn btn-primary" id="btnAddBA">
+        <i class="bx bx-plus me-1"></i> Buat Berita Acara
+      </button>
+      <% } %>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive text-nowrap">
+        <table class="table table-sm table-bordered w-100" id="baTable">
+          <thead>
+            <tr>
+              <th class="col-no">No</th>
+              <th class="col-kode">Nomor BA</th>
+              <th class="col-tgl">Tanggal Kas</th>
+              <th class="col-nominal text-end">Total Setoran</th>
+              <th class="col-angka text-center">Jumlah Bukti</th>
+              <th class="col-status">Status</th>
+              <th class="col-sedang">Ditandatangani oleh</th>
+              <th class="col-aksi">Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Buat BA -->
+<div class="modal fade" id="baFormModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Buat Berita Acara</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <form id="formBA" onsubmit="return false">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="tglKas" class="form-label">Tanggal Kas <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="tglKas" name="tglKas" required>
+            <div class="form-text">Total setoran dan jumlah bukti dihitung dari Data Kas SIM RS pada tanggal ini.</div>
+          </div>
+          <div class="mb-3">
+            <label for="catatanBA" class="form-label">Catatan</label>
+            <textarea class="form-control" id="catatanBA" name="catatan" rows="2" maxlength="255"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Lihat BA -->
+<div class="modal fade" id="baViewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Berita Acara <code id="baViewNo"></code></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <dl class="row mb-0" id="baViewBody"></dl>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+        <% if (akses.export) { %>
+        <button type="button" class="btn btn-outline-primary" id="btnCetakBA"><i class="bx bx-printer me-1"></i> Cetak</button>
+        <% } %>
+        <% if (akses.validasi) { %>
+        <button type="button" class="btn btn-success d-none" id="btnTtdBA"><i class="bx bx-pen me-1"></i> Tandatangani</button>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var canExport = <%= akses.export ? 'true' : 'false' %>;
+
+    function cetak(id) {
+      window.open('/beritaAcara/exportCetak/' + encodeURIComponent(id), '_blank');
+    }
+
+    function escapeHtml(value) {
+      return $('<div>').text(value == null ? '' : value).html();
+    }
+    function rupiah(v) { return 'Rp ' + Number(v || 0).toLocaleString('id-ID'); }
+    function tgl(v) { return v ? new Date(v.length === 10 ? v + 'T00:00:00' : v).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'; }
+    function tglJam(v) { return v ? tgl(v) + ' ' + new Date(v).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'; }
+    var statusBadge = {
+      menunggu: '<span class="badge bg-label-warning">Menunggu TTD</span>',
+      selesai: '<span class="badge bg-label-success"><i class="bx bx-check"></i> Selesai</span>'
+    };
+
+    if ($.fn.DataTable.isDataTable('#baTable')) {
+      $('#baTable').DataTable().destroy();
+    }
+
+    var table = $('#baTable').DataTable({
+      serverSide: true,
+      processing: true,
+      ajax: { url: '/beritaAcara/data' },
+      columns: [
+        { data: null, orderable: false, render: function (data, type, row, meta) { return meta.settings._iDisplayStart + meta.row + 1; } },
+        { data: 'noBA', render: function (v) { return '<code>' + escapeHtml(v) + '</code>'; } },
+        { data: 'tglKas', render: tgl },
+        { data: 'totalSetoran', className: 'text-end', render: rupiah },
+        { data: 'jumlahBukti', className: 'text-center' },
+        { data: 'status', render: function (v) { return statusBadge[v] || escapeHtml(v); } },
+        { data: 'ttdOleh', render: function (v) { return v ? escapeHtml(v) : '&mdash;'; } },
+        {
+          data: null, orderable: false, className: 'text-center text-nowrap', width: '1%',
+          render: function (data, type, row) {
+            var id = escapeHtml(row.noBA);
+            var buttons = '<button class="btn btn-sm btn-info btn-detail" data-id="' + id + '" title="Lihat"><i class="bx bx-show"></i></button>';
+            if (canExport) buttons += '<button class="btn btn-sm btn-outline-primary btn-cetak ms-1" data-id="' + id + '" title="Cetak"><i class="bx bx-printer"></i></button>';
+            return buttons;
+          }
+        }
+      ],
+      order: [[2, 'desc']],
+      language: {
+        processing: 'Sedang memproses...',
+        lengthMenu: 'Tampilkan _MENU_ entri',
+        zeroRecords: 'Tidak ditemukan data yang sesuai',
+        info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ entri',
+        infoEmpty: 'Menampilkan 0 sampai 0 dari 0 entri',
+        infoFiltered: '(disaring dari _MAX_ entri keseluruhan)',
+        search: 'Cari:',
+        paginate: { first: 'Pertama', previous: 'Sebelumnya', next: 'Selanjutnya', last: 'Terakhir' }
+      }
+    });
+
+    $('#btnAddBA').off('click').on('click', function () {
+      $('#formBA')[0].reset();
+      $('#tglKas').val(new Date().toISOString().slice(0, 10));
+      $('#baFormModal').modal('show');
+    });
+
+    $('#formBA').off('submit').on('submit', function () {
+      $.post('/beritaAcara/insert', $(this).serialize())
+        .done(function (res) {
+          if (res.success) {
+            $('#baFormModal').modal('hide');
+            table.ajax.reload(null, false);
+            Swal.fire('Berhasil', res.message, 'success');
+          } else {
+            Swal.fire('Gagal', res.message, 'error');
+          }
+        })
+        .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); });
+    });
+
+    $('#baTable').off('click', '.btn-detail').on('click', '.btn-detail', function () {
+      $.get('/beritaAcara/detail/' + encodeURIComponent($(this).data('id')), function (res) {
+        if (!res.success) return Swal.fire('Gagal', res.message, 'error');
+        var b = res.data;
+        var rows = [
+          ['Tanggal Kas', escapeHtml(tgl(b.tglKas))],
+          ['Total Setoran', rupiah(b.totalSetoran)],
+          ['Jumlah Bukti', escapeHtml(b.jumlahBukti)],
+          ['Status', statusBadge[b.status] || escapeHtml(b.status)],
+          ['Ditandatangani', b.ttdOleh ? escapeHtml(b.ttdOleh) + ' <small class="text-muted">(' + escapeHtml(tglJam(b.tglTtd)) + ')</small>' : '&mdash;'],
+          ['Catatan', b.catatan ? escapeHtml(b.catatan) : '&mdash;']
+        ];
+        $('#baViewNo').text(b.noBA);
+        $('#baViewBody').html(rows.map(function (r) {
+          return '<dt class="col-sm-4">' + r[0] + '</dt><dd class="col-sm-8">' + r[1] + '</dd>';
+        }).join(''));
+        $('#btnCetakBA').data('id', b.noBA);
+        $('#btnTtdBA').data('id', b.noBA).toggleClass('d-none', b.status === 'selesai');
+        $('#baViewModal').modal('show');
+      });
+    });
+
+    $('#baTable').off('click', '.btn-cetak').on('click', '.btn-cetak', function () {
+      cetak($(this).data('id'));
+    });
+
+    $('#btnCetakBA').off('click').on('click', function () {
+      cetak($(this).data('id'));
+    });
+
+    $('#btnTtdBA').off('click').on('click', function () {
+      var id = $(this).data('id');
+      Swal.fire({
+        title: 'Tandatangani ' + id + '?',
+        text: 'Berita acara yang sudah ditandatangani tidak dapat diubah.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Tandatangani',
+        cancelButtonText: 'Batal'
+      }).then(function (result) {
+        if (!result.isConfirmed) return;
+        $.post('/beritaAcara/validasi/' + encodeURIComponent(id))
+          .done(function (res) {
+            Swal.fire(res.success ? 'Berhasil' : 'Gagal', res.message, res.success ? 'success' : 'error');
+            if (res.success) {
+              $('#baViewModal').modal('hide');
+              table.ajax.reload(null, false);
+            }
+          })
+          .fail(function () { Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'); });
+      });
+    });
+  })();
+</script>

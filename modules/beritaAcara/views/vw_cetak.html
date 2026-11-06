@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title><%= ba.noBA %> - Berita Acara Penutupan Kas Harian</title>
+  <link rel="icon" type="image/png" href="/logo1.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Balinese:wght@400..700&display=swap">
+  <style>
+    @page { size: A4 portrait; margin: 15mm 18mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #e9ecef; color: #000; font-family: "Times New Roman", Times, serif; font-size: 12pt; line-height: 1.45; }
+    .halaman { position: relative; width: 210mm; min-height: 297mm; margin: 16px auto; padding: 15mm 18mm; background: #fff; box-shadow: 0 2px 10px rgba(0, 0, 0, .15); }
+    .toolbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: center; gap: 8px; padding: 10px; background: #343a40; }
+    .toolbar button { padding: 6px 16px; border: 0; border-radius: 4px; font: 500 14px system-ui, sans-serif; cursor: pointer; }
+    .btn-cetak { background: #0d6efd; color: #fff; }
+    .btn-tutup { background: #6c757d; color: #fff; }
+
+    .kop { display: flex; align-items: center; gap: 16px; padding-bottom: 6px; border-bottom: 3px double #000; }
+    .kop img { width: 84px; height: 84px; object-fit: contain; }
+    .kop-teks { flex: 1; text-align: center; line-height: 1.2; }
+    .kop-teks .bali { font-family: "Noto Sans Balinese", "Noto Serif Balinese", sans-serif; font-size: 10pt; line-height: 1.6; }
+    .kop-teks .latin { font-weight: bold; text-transform: uppercase; }
+    .kop-teks .baris1 { font-size: 13pt; }
+    .kop-teks .baris2 { font-size: 14pt; }
+    .kop-teks .baris3 { font-size: 15pt; }
+    .kop-teks .alamat { margin-top: 2px; font-size: 9.5pt; }
+    .kop-teks .alamat.bali { font-size: 8.5pt; }
+    .kop-spacer { width: 84px; }
+
+    .judul { margin: 20px 0 2px; text-align: center; font-size: 13pt; font-weight: bold; text-decoration: underline; }
+    .nomor { margin-bottom: 18px; text-align: center; }
+    p { margin: 0 0 10px; text-align: justify; }
+
+    .terbilang { font-style: italic; }
+
+    table.pihak { margin: 0 0 10px; border-collapse: collapse; }
+    table.pihak td { padding: 1px 0; vertical-align: top; }
+    table.pihak td.no { width: 24px; }
+    table.pihak td.lbl { width: 90px; }
+    table.pihak td.sep { width: 14px; }
+
+    .ttd { display: flex; justify-content: space-between; margin-top: 28px; text-align: center; break-inside: avoid; }
+    .ttd > div { width: 45%; }
+    .ttd .ruang { height: 72px; }
+    .ttd .nama { font-weight: bold; text-decoration: underline; }
+
+    .draft { position: absolute; top: 45%; left: 0; right: 0; text-align: center; transform: rotate(-30deg); font: bold 64pt system-ui, sans-serif; color: rgba(220, 53, 69, .12); pointer-events: none; }
+
+    @media print {
+      body { background: #fff; }
+      .toolbar { display: none; }
+      .halaman { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button type="button" class="btn-cetak" onclick="window.print()">Cetak</button>
+    <button type="button" class="btn-tutup" onclick="window.close()">Tutup</button>
+  </div>
+
+  <div class="halaman">
+    <% if (ba.status !== 'selesai') { %><div class="draft">BELUM DISAHKAN</div><% } %>
+
+    <div class="kop">
+      <img src="/assets/img/login/logo-pemprov.png" alt="Logo Pemerintah Provinsi Bali">
+      <div class="kop-teks">
+        <div class="bali">ᬧᭂᬫᭂᬭᬶᬦ᭄ᬢᬄ ᬧ᭄ᬭᭀᬧᬶᬦ᭄ᬲᬶ ᬩᬮᬶ</div>
+        <div class="latin baris1">Pemerintah Provinsi Bali</div>
+        <div class="bali">ᬤᬶᬦᬲ᭄ ᬓᭂᬲᭂᬳᬢᬦ᭄</div>
+        <div class="latin baris2">Dinas Kesehatan</div>
+        <div class="bali">ᬭᬸᬫᬄ ᬲᬓᬶᬢ᭄ ᬫᬢ ᬩᬮᬶ ᬫᬦ᭄ᬤᬭ</div>
+        <div class="latin baris3">Rumah Sakit Mata Bali Mandara</div>
+        <div class="bali alamat">ᬚᬮᬦ᭄ ᬅᬗ᭄ᬲᭀᬓ ᬦᭀᬫᭀᬃ ᭘, ᬤᭂᬦ᭄ᬧᬲᬃ (᭘᭐᭒᭓᭓), ᬢᭂᬮᭂᬧᭀᬦ᭄ (᭐᭓᭖᭑) ᭒᭔᭓᭓᭕᭐</div>
+        <div class="alamat">Jalan Angsoka Nomor 8, Denpasar (80233), Telepon (0361) 243350</div>
+      </div>
+      <div class="kop-spacer"></div>
+    </div>
+
+    <div class="judul">BERITA ACARA PENITIPAN UANG</div>
+    <div class="nomor">Nomor: <%= ba.noBA %></div>
+
+    <p>
+      Pada hari ini <strong><%= hari %></strong> tanggal <strong><%= tanggalKata %></strong> bulan <strong><%= bulan %></strong>
+      tahun <strong><%= tahunKata %></strong> kami masing-masing:
+    </p>
+
+    <table class="pihak">
+      <tr><td rowspan="4" class="no">1.</td><td class="lbl">Nama</td><td class="sep">:</td><td><%= pihakPertama.nama %></td></tr>
+      <tr><td>NIP</td><td>:</td><td><%= pihakPertama.nip %></td></tr>
+      <tr><td>Jabatan</td><td>:</td><td><%= pihakPertama.jabatan %></td></tr>
+      <tr><td colspan="3">Selanjutnya disebut <strong>PIHAK PERTAMA</strong></td></tr>
+    </table>
+
+    <table class="pihak">
+      <tr><td rowspan="4" class="no">2.</td><td class="lbl">Nama</td><td class="sep">:</td><td><%= pihakKedua.nama %></td></tr>
+      <tr><td>NIP</td><td>:</td><td><%= pihakKedua.nip %></td></tr>
+      <tr><td>Jabatan</td><td>:</td><td><%= pihakKedua.jabatan %></td></tr>
+      <tr><td colspan="3">Selanjutnya disebut <strong>PIHAK KEDUA</strong></td></tr>
+    </table>
+
+    <p>
+      <strong>PIHAK KEDUA</strong> menitipkan uang sebesar <strong>Rp <%= rupiah(ba.totalSetoran) %>,-</strong>
+      Terbilang (<span class="terbilang"><%= terbilang %></span>) kepada <strong>PIHAK PERTAMA</strong> untuk disimpan
+      sementara dalam brankas karena akan disetor pada hari kerja berikutnya.
+    </p>
+    <% if (ba.catatan) { %><p>Catatan: <%= ba.catatan %></p><% } %>
+
+    <p>
+      Berita acara ini dibuat dengan sesungguhnya untuk dapat dipergunakan sebagaimana mestinya.
+    </p>
+
+    <div class="ttd">
+      <div>
+        <div>&nbsp;</div>
+        <div>PIHAK PERTAMA</div>
+        <div class="ruang"></div>
+        <div class="nama"><%= pihakPertama.nama %></div>
+        <div>NIP. <%= pihakPertama.nip %></div>
+      </div>
+      <div>
+        <div>Denpasar, <%= tanggalTtd %></div>
+        <div>PIHAK KEDUA</div>
+        <div class="ruang"></div>
+        <div class="nama"><%= pihakKedua.nama %></div>
+        <div>NIP. <%= pihakKedua.nip %></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,60 +1,205 @@
+<%
+  function rp(n) { return 'Rp ' + Number(n || 0).toLocaleString('id-ID'); }
+  var totalJenis = dash.jenisPenerimaan.reduce(function (s, j) { return s + j.nilai; }, 0);
+  var dotClass = { ok: 'bg-success', err: 'bg-danger', info: 'bg-warning' };
+%>
 <div class="flex-grow-1 container-p-y container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="mb-1">Halo, <%= username %></h4>
+      <small class="text-muted"><%= subtitle %><% if (nmKLP) { %> &middot; Kelompok: <strong><%= nmKLP %></strong><% } %></small>
+    </div>
+    <span class="badge bg-label-success"><i class="bx bx-wifi me-1"></i> SIPKD API Terhubung</span>
+  </div>
+
+  <!-- KPI -->
   <div class="row">
-    <div class="col-12 mb-4">
-      <div class="card bg-primary text-white">
+    <div class="col-sm-6 col-xl-3 mb-4">
+      <div class="card h-100">
         <div class="card-body">
-          <h4 class="card-title text-white mb-2">Halo, <%= username %></h4>
-          <p class="card-text mb-0"><%= subtitle %><% if (nmKLP) { %> &middot; Kelompok: <strong><%= nmKLP %></strong><% } %></p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4 mb-4">
-      <div class="card h-100">
-        <div class="card-body d-flex align-items-center">
-          <span class="avatar-initial rounded bg-label-primary p-3 me-3"><i class="bx bx-user bx-md"></i></span>
-          <div>
-            <small class="text-muted d-block">User</small>
-            <h4 class="mb-0"><%= stats.totalUser || 0 %></h4>
+          <div class="d-flex justify-content-between align-items-start">
+            <small class="text-muted">Pendapatan hari ini</small>
+            <span class="avatar-initial rounded bg-label-primary p-2"><i class="bx bx-dollar"></i></span>
           </div>
+          <h4 class="mb-1 mt-2"><%= rp(dash.pendapatanHariIni) %></h4>
+          <% if (dash.deltaPersen === null) { %>
+          <small class="text-muted">Belum ada data hari sebelumnya</small>
+          <% } else { %>
+          <small class="<%= dash.deltaPersen >= 0 ? 'text-success' : 'text-danger' %> fw-medium"><i class="bx <%= dash.deltaPersen >= 0 ? 'bx-up-arrow-alt' : 'bx-down-arrow-alt' %>"></i> <%= Math.abs(dash.deltaPersen).toLocaleString('id-ID') %>% dari hari sebelumnya</small>
+          <% } %>
         </div>
       </div>
     </div>
-    <div class="col-md-4 mb-4">
+    <div class="col-sm-6 col-xl-3 mb-4">
       <div class="card h-100">
-        <div class="card-body d-flex align-items-center">
-          <span class="avatar-initial rounded bg-label-success p-3 me-3"><i class="bx bx-group bx-md"></i></span>
-          <div>
-            <small class="text-muted d-block">Kelompok</small>
-            <h4 class="mb-0"><%= stats.totalKelompok || 0 %></h4>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4 mb-4">
-      <div class="card h-100">
-        <div class="card-body d-flex align-items-center">
-          <span class="avatar-initial rounded bg-label-info p-3 me-3"><i class="bx bx-menu bx-md"></i></span>
-          <div>
-            <small class="text-muted d-block">Fitur / Menu</small>
-            <h4 class="mb-0"><%= stats.totalFitur || 0 %></h4>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-12">
-      <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Mulai dari sini</h5>
-          <ul class="mb-0">
-            <li>Buat tabel baru lewat file SQL di <code>migrations/</code>, lalu jalankan <code>npm run db:migrate</code>.</li>
-            <li>Buka menu <strong>Generate Module</strong> untuk membuat controller + view CRUD dari tabel tersebut.</li>
-            <li>Daftarkan modul di menu <strong>Fitur</strong>, lalu beri hak akses di <strong>Otorisasi</strong>.</li>
-            <li>Lihat modul <strong>Contoh</strong> sebagai referensi CRUD dengan DataTables server-side.</li>
+          <div class="d-flex justify-content-between align-items-start">
+            <small class="text-muted">Transaksi tercatat</small>
+            <span class="avatar-initial rounded bg-label-success p-2"><i class="bx bx-check"></i></span>
+          </div>
+          <h4 class="mb-1 mt-2"><%= dash.transaksi %></h4>
+          <small class="text-success fw-medium">TBP <%= dash.persenTbp.toLocaleString('id-ID') %>% &middot; STS <%= dash.persenSts.toLocaleString('id-ID') %>%</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <small class="text-muted">Menunggu diunggah</small>
+            <span class="avatar-initial rounded bg-label-warning p-2"><i class="bx bx-time-five"></i></span>
+          </div>
+          <h4 class="mb-1 mt-2"><%= dash.menungguUnggah %> dokumen</h4>
+          <small class="text-warning fw-medium">Menunggu sinkronisasi berikutnya</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <small class="text-muted">Gagal kirim ke SIPKD</small>
+            <span class="avatar-initial rounded bg-label-danger p-2"><i class="bx bx-error-circle"></i></span>
+          </div>
+          <h4 class="mb-1 mt-2"><%= dash.gagalKirim %> dokumen</h4>
+          <small class="text-danger fw-medium">Perlu tindakan &mdash; <a href="/logApi/index" class="text-danger text-decoration-underline">lihat Log API</a></small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-7 mb-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="mb-0">Tren pendapatan per jam</h5>
+            <small class="text-muted"><%= new Date(dash.tanggal + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %> &middot; total <%= rp(dash.pendapatanHariIni) %></small>
+          </div>
+          <input type="date" class="form-control form-control-sm w-auto" id="dashTanggal" value="<%= dash.tanggal %>">
+        </div>
+        <div class="card-body"><div id="chartTrenPendapatan"></div></div>
+      </div>
+    </div>
+    <div class="col-lg-5 mb-4">
+      <div class="card h-100">
+        <div class="card-header"><h5 class="mb-0">Komposisi layanan</h5></div>
+        <div class="card-body">
+          <% if (dash.komposisi.length) { %>
+          <div id="chartKomposisi"></div>
+          <% } else { %>
+          <div class="text-center text-muted py-5">Belum ada transaksi pada tanggal ini</div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-7 mb-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Aktivitas sistem terkini</h5>
+          <a href="/logApi/index" class="small fw-medium">Lihat semua &rarr;</a>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <% if (!dash.aktivitas.length) { %>
+            <li class="list-group-item px-0 text-muted small">Belum ada aktivitas</li>
+            <% } %>
+            <% dash.aktivitas.forEach(function (a) { %>
+            <li class="list-group-item d-flex align-items-start gap-2 px-0">
+              <span class="badge badge-dot <%= dotClass[a.tipe] %> mt-2"></span>
+              <div class="flex-grow-1 small">
+                <%= a.teks %> <% if (a.kode) { %><code><%= a.kode %></code><% } %> <%= a.akhir %>
+              </div>
+              <small class="text-muted text-nowrap"><%= a.waktu %></small>
+            </li>
+            <% }); %>
           </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5 mb-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Jenis penerimaan</h5>
+          <small class="text-muted">30 hari terakhir</small>
+        </div>
+        <div class="card-body">
+          <% dash.jenisPenerimaan.forEach(function (j, i) { var pct = totalJenis ? (j.nilai / totalJenis * 100) : 0; %>
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small mb-1">
+              <span><%= j.label %></span><span class="fw-semibold"><%= rp(j.nilai) %></span>
+            </div>
+            <div class="progress" style="height: 8px;">
+              <div class="progress-bar <%= i === 0 ? 'bg-primary' : 'bg-warning' %>" role="progressbar" style="width: <%= pct.toFixed(1) %>%"></div>
+            </div>
+          </div>
+          <% }); %>
+          <div class="alert alert-primary mb-0 small">
+            Total akumulasi pendapatan terintegrasi periode berjalan: <strong><%= rp(totalJenis) %></strong>
+            dari <%= dash.jumlahBuktiPeriode.toLocaleString('id-ID') %> bukti transaksi SIM RS.
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  (function () {
+    var tren = <%- JSON.stringify(dash.trenPerJam) %>;
+    var komposisi = <%- JSON.stringify(dash.komposisi) %>;
+
+    function rupiah(v) { return 'Rp ' + Number(v || 0).toLocaleString('id-ID'); }
+    function singkat(v) { return v >= 1e6 ? (v / 1e6).toLocaleString('id-ID', { maximumFractionDigits: 1 }) + 'jt' : Number(v).toLocaleString('id-ID'); }
+
+    $('#dashTanggal').off('change').on('change', function () {
+      if (this.value) window.location.href = '/home?tanggal=' + encodeURIComponent(this.value);
+    });
+
+    if (typeof ApexCharts === 'undefined') return;
+
+    var trenEl = document.querySelector('#chartTrenPendapatan');
+    var komposisiEl = document.querySelector('#chartKomposisi');
+    if (!trenEl) return;
+
+    new ApexCharts(trenEl, {
+      chart: { type: 'area', height: 260, toolbar: { show: false }, parentHeightOffset: 0 },
+      series: [{ name: 'Pendapatan', data: tren.nilai }],
+      xaxis: { categories: tren.jam },
+      yaxis: { labels: { formatter: singkat } },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth', width: 2.5 },
+      markers: { size: 3 },
+      colors: ['#128080'],
+      fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0 } },
+      tooltip: { y: { formatter: rupiah } }
+    }).render();
+
+    if (!komposisiEl) return;
+    var total = komposisi.reduce(function (s, k) { return s + k.nilai; }, 0);
+    new ApexCharts(komposisiEl, {
+      chart: { type: 'donut', height: 260 },
+      series: komposisi.map(function (k) { return k.nilai; }),
+      labels: komposisi.map(function (k) { return k.label; }),
+      colors: ['#128080', '#c8922b'],
+      legend: { position: 'bottom' },
+      dataLabels: { enabled: false },
+      tooltip: { y: { formatter: rupiah } },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: '70%',
+            labels: {
+              show: true,
+              value: { formatter: function (v) { return singkat(Number(v)); } },
+              total: { show: true, label: 'Total hari ini', formatter: function () { return singkat(total); } }
+            }
+          }
+        }
+      }
+    }).render();
+  })();
+</script>

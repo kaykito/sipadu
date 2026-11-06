@@ -17,10 +17,12 @@ Diturunkan dari inti aplikasi Gov-Fina BLUD. Semua modul bisnisnya sudah dibuang
 
 ## Persiapan
 
+Butuh **Node.js 24** (lihat `.nvmrc`). Dengan nvm: `nvm use 24.11.1`.
+
 ```bash
 npm install
 cp .env.example .env        # isi DB_*, SESSION_SECRET, dll.
-npm run db:migrate          # buat tabel inti + data awal
+npm run db:setup            # db:migrate (tabel) lalu db:seed (data awal)
 npm run dev                 # http://localhost:2301
 ```
 
@@ -37,6 +39,9 @@ Tabel `Sessions` (penyimpanan sesi) dibuat otomatis saat aplikasi pertama kali j
 | `npm run build` | Cek sintaks semua file JS server (`node --check`) |
 | `npm run db:migrate` | Jalankan file `migrations/*.sql` yang belum pernah dijalankan (dicatat di tabel `SchemaMigrations`) |
 | `npm run db:migrate:baseline` | Tandai semua migration sebagai sudah dijalankan tanpa mengeksekusinya |
+| `npm run db:seed` | Jalankan file `seeders/*.sql` yang belum pernah dijalankan (dicatat di tabel `SchemaSeeders`) |
+| `npm run db:seed:baseline` | Tandai semua seeder sebagai sudah dijalankan tanpa mengeksekusinya |
+| `npm run db:setup` | `db:migrate` lalu `db:seed` |
 | `npm run generate:tables:db` | Dump `CREATE TABLE` dari database aktif ke `migrations/tables/` |
 
 ## Struktur
@@ -48,7 +53,8 @@ auth.js                check_login, check_session_valid (single-session)
 database.js            pool mssql (data) + Sequelize (session store)
 helpers/accessControl  checkAccess(req, aksi)
 middleware/            Turnstile, reset session saat pindah menu
-migrations/*.sql       migration berurutan menurut nama file
+migrations/*.sql       migration skema (tabel, index), berurutan menurut nama file
+seeders/*.sql          seeder data (data awal, menu FITUR/OTORISASI), dijalankan setelah migration
 modules/<nama>/
   controllers/<nama>.js
   views/*.html         template EJS
@@ -57,7 +63,7 @@ views/                 layout (header, sidebar, footer), login, error
 
 ## Menambah modul baru
 
-1. Tulis tabelnya di file migration baru, misalnya `migrations/20261101_0001_produk.sql`, lalu jalankan `npm run db:migrate`.
+1. Tulis tabelnya di file migration baru, misalnya `migrations/20261101_0001_produk.sql`, lalu jalankan `npm run db:migrate`. Data awalnya (master data, menu) taruh di seeder, misalnya `seeders/20261101_0001_produk.sql`, lalu jalankan `npm run db:seed`.
 2. Buat modulnya dengan salah satu cara:
    - **Generator**: buka *Setting → Developer → Generate Module*, pilih tabel, lalu isi nama modul. Generator hanya aktif saat `NODE_ENV` bukan `production`.
    - **Manual**: salin `modules/contoh/` dan ganti nama tabel serta kolomnya. Nama folder harus sama dengan nama file controller dan segmen URL.
