@@ -7,3 +7,6 @@ storage/
 public/uploads/**
 !public/uploads/avatars/
 !public/uploads/avatars/.gitkeep
+
+# Backup database (terlalu besar untuk GitHub)
+DB BLUD *
