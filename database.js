@@ -36,9 +36,13 @@ const sequelize = new Sequelize(
         host: process.env.DB_HOST || 'localhost',
         port: parseInt(process.env.DB_PORT) || 1433,
         dialect: 'mssql',
+        // Untuk mssql, opsi tedious harus di dalam dialectOptions.options; kalau di level atas diabaikan
+        // sehingga encrypt default true dan TLS gagal saat DB_HOST berupa IP (mis. 127.0.0.1).
         dialectOptions: {
-            encrypt: false,
-            trustServerCertificate: true,
+            options: {
+                encrypt: false,
+                trustServerCertificate: true,
+            },
         },
         logging: false, // nonaktifkan log query
         pool: {
